@@ -3,7 +3,7 @@
 
 (def click-count (r/atom 0))
 
-(defn counter []
+(defn counter [click-count]
   [:div.counter
    [:p.count @click-count]
    [:input {:type "button" :value "Click me!"
