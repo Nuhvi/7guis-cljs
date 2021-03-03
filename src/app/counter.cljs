@@ -1,7 +1,4 @@
-(ns app.counter
-  (:require [reagent.core :as r]))
-
-(def click-count (r/atom 0))
+(ns app.counter)
 
 (defn counter [click-count]
   [:div.counter

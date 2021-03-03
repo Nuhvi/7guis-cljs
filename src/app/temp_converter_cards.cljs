@@ -1,9 +1,9 @@
-(ns app.counter-cards
+(ns app.temp-converter-cards
   (:require [reagent.core :as r]
             [devcards.core :as dc :refer [defcard deftest]]
             [cljs.test :include-macros true :refer [is]]
             ["@testing-library/react" :refer [render cleanup fireEvent]]
-            [app.counter :refer [counter]]))
+            [app.temp-converter :refer [converter]]))
 
 (defn testing-container
   "The container that should be used to render testing-library react components.
@@ -13,22 +13,15 @@
     (.setAttribute app-div "id" "testing-lib")
     (js/document.body.appendChild app-div)))
 
-(defcard counter-card
-  (dc/reagent counter)
-  (r/atom 0)
+(defcard converter-card
+  (dc/reagent converter)
   {:inspect-data false
    :frame true
    :history true})
 
-(deftest click-counter-tests-card
-  (let [atom (r/atom 0)
-        element (r/as-element [counter atom])
+(deftest converter-tests-card
+  (let [element (r/as-element [converter])
         tr (render element #js {:container (testing-container)})]
-    (is (.queryByText tr #"^0$") "Should show the initial value as '0'")
-    (.click fireEvent (.queryByText tr #"(?i)click me"))
-    (r/flush)
-    (is (.queryByText tr #"^1$") "Should show the value as '1' after click")
-    (.click fireEvent (.queryByText tr #"(?i)click me"))
-    (r/flush)
-    (is (.queryByText tr #"^2$") "Should show the value as '2' after two clicks")
+    (is (= (count (.queryAllByDisplayValue tr "")) 2)
+            "Should start with empty value")
     (cleanup)))
