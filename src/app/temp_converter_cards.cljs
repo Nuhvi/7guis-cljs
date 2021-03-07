@@ -23,5 +23,9 @@
   (let [element (r/as-element [converter])
         tr (render element #js {:container (testing-container)})]
     (is (= (count (.queryAllByDisplayValue tr "")) 2)
-            "Should start with empty value")
+        "Should start with empty value")
+    (.change fireEvent
+             (.queryByTestId tr "celsius")
+             {:target {:value "23"}})
+    (is (= "23" (.-value (.queryByTestId tr "celsius"))) "Should XXXXX")
     (cleanup)))

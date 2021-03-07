@@ -19,3 +19,42 @@ body {
 
   box-shadow: 0 0 9px rgb(207, 207, 207);
 }
+
+.counter,
+.converter {
+  padding: 1em;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  background-image: linear-gradient(135deg, #fccf31 10%, #f55555 100%);
+  border-radius: 0.5em;
+  box-shadow: 1px 1px black;
+
+  box-shadow: 1px 4px 15px 0px rgba(203, 203, 203, 0.75);
+}
+
+input {
+  font-size: 1.3em;
+  border: none;
+  margin: 0.5em 0;
+  border-radius: 99999px;
+  padding: 0.5em 1em;
+  background-color: #fefefe;
+  border: 3px solid #fff;
+}
+
+input:focus {
+  outline: none;
+  border: 3px solid orange;
+}
+
+.invalid {
+  background-color: rgb(255, 103, 103);
+}
+
+.freeze {
+  background-color: rgb(187, 187, 187);
+}
