@@ -1,3 +1,5 @@
+@import './leva-css-values.css';
+
 html,
 body {
   width: 100%;
@@ -8,53 +10,85 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 12px;
 }
 
 .app {
   width: 375px;
   height: 812px;
-  border-radius: 1em;
+  border-radius: var(--radii-leva__lg);
   overflow: hidden;
   padding: 1em;
 
-  box-shadow: 0 0 9px rgb(207, 207, 207);
+  background-color: rgb(153, 153, 153);
+  border: 2px solid rgb(102, 102, 102);
 }
 
-.counter,
-.converter {
+.component {
+  border-radius: var(--radii-leva__lg);
+  background-color: var(--colors-leva__elevation1);
+  color: var(--colors-leva__highlight2);
+
+  font-family: monospace;
+}
+
+.component * {
+  font-family: inherit;
+}
+
+.component .title {
   padding: 1em;
-
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-
-  background-image: linear-gradient(135deg, #fccf31 10%, #f55555 100%);
-  border-radius: 0.5em;
-  box-shadow: 1px 1px black;
-
-  box-shadow: 1px 4px 15px 0px rgba(203, 203, 203, 0.75);
 }
 
-input {
-  font-size: 1.3em;
-  border: none;
-  margin: 0.5em 0;
-  border-radius: 99999px;
-  padding: 0.5em 1em;
-  background-color: #fefefe;
-  border: 3px solid #fff;
+.component .content {
+  background-color: var(--colors-leva__elevation2);
+  border-radius: var(--radii-leva__lg);
+  padding: 1em;
 }
 
-input:focus {
+.component input[type='button'] {
   outline: none;
-  border: 3px solid orange;
+  border: none;
+  color: var(--colors-leva__highlight3);
+  height: var(--sizes-leva__rowHeight);
+  border-style: none;
+  border-radius: var(--radii-leva__sm);
+  background-color: var(--colors-leva__accent2);
+  cursor: pointer;
+  box-sizing: border-box;
 }
 
-.invalid {
-  background-color: rgb(255, 103, 103);
+.component input[type='button']:hover {
+  box-shadow: inset 0 0 0 var(--borderWidths-leva__hover)
+    var(--colors-leva__accent3);
 }
 
-.freeze {
-  background-color: rgb(187, 187, 187);
+.component input[type='button']:focus {
+  box-shadow: 0 0 0 var(--borderWidths-leva__focus) var(--colors-leva__accent2);
+}
+
+.counter .content {
+  display: grid;
+}
+
+.counter .count-container {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 0 0 1em 0;
+}
+
+.counter .count {
+  background-color: var(--colors-leva__elevation3);
+  color: var(--colors-leva__highlight3);
+  line-height: var(--sizes-leva__rowHeight);
+  padding: 0 1em;
+  min-width: 50%;
+  text-align: right;
+
+  position: relative;
+  border-radius: var(--radii-leva__sm);
+  background-color: var(--colors-leva__elevation3);
+  box-shadow: inset 0 0 0 var(--borderWidths-leva__input)
+    var(--colors-leva__elevation1);
 }

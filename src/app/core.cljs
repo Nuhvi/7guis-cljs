@@ -10,7 +10,7 @@
 
 (defn app []
   [:main.app
-   [counter (:count @app-state)]])
+   [counter (r/atom 0)]])
 
 (defn ^:dev/after-load render
   "Render the toplevel component for this app."
