@@ -1,11 +1,10 @@
-(ns app.counter)
+(ns app.counter
+  (:require [app.wrapper :refer [wrapper]]))
 
 (defn counter [click-count]
-  [:div.counter.component
-   [:p.title "Counter"]
-   [:div.content
-    [:div.count-container
+  [wrapper {:title "Counter"}
+    [:div.row
      [:p "Count:"]
-     [:p.count @click-count]]
+     [:input.field {:value @click-count}]]
     [:input {:type "button" :value "Increment"
-             :on-click #(swap! click-count inc)}]]])
+             :on-click #(swap! click-count inc)}]])

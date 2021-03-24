@@ -20,6 +20,10 @@ body {
   overflow: hidden;
   padding: 1em;
 
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
   background-color: rgb(153, 153, 153);
   border: 2px solid rgb(102, 102, 102);
 }
@@ -28,12 +32,16 @@ body {
   border-radius: var(--radii-leva__lg);
   background-color: var(--colors-leva__elevation1);
   color: var(--colors-leva__highlight2);
+  width: var(--sizes-leva__rootWidth);
 
-  font-family: monospace;
+  font-family: var(--fonts-leva__mono);
+
+  margin-bottom: 1em;
 }
 
 .component * {
   font-family: inherit;
+  box-sizing: border-box;
 }
 
 .component .title {
@@ -44,9 +52,11 @@ body {
   background-color: var(--colors-leva__elevation2);
   border-radius: var(--radii-leva__lg);
   padding: 1em;
+  display: grid;
+  row-gap: var(--space-leva__md);
 }
 
-.component input[type='button'] {
+input[type='button'] {
   outline: none;
   border: none;
   color: var(--colors-leva__highlight3);
@@ -58,37 +68,55 @@ body {
   box-sizing: border-box;
 }
 
-.component input[type='button']:hover {
+input[type='button']:hover {
   box-shadow: inset 0 0 0 var(--borderWidths-leva__hover)
     var(--colors-leva__accent3);
 }
 
-.component input[type='button']:focus {
+input[type='button']:focus {
   box-shadow: 0 0 0 var(--borderWidths-leva__focus) var(--colors-leva__accent2);
 }
 
-.counter .content {
-  display: grid;
-}
-
-.counter .count-container {
+.row {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  padding: 0 0 1em 0;
+  min-width: 0;
+  column-gap: var(--space-leva__md);
+
+  color: var(--colors-leva__highlight2);
 }
 
-.counter .count {
-  background-color: var(--colors-leva__elevation3);
+.row:hover,
+.row:focus-within {
   color: var(--colors-leva__highlight3);
+}
+
+.row .field {
+  width: 50%;
+}
+
+.field {
+  background-color: var(--colors-leva__elevation3);
   line-height: var(--sizes-leva__rowHeight);
   padding: 0 1em;
-  min-width: 50%;
   text-align: right;
+  color: inherit;
 
+  outline: none;
+  border: none;
   position: relative;
   border-radius: var(--radii-leva__sm);
   background-color: var(--colors-leva__elevation3);
   box-shadow: inset 0 0 0 var(--borderWidths-leva__input)
     var(--colors-leva__elevation1);
+}
+
+.field.invalid {
+  box-shadow: inset 0 0 6px rgb(122, 17, 17);
+  color: var(--colors-leva__highlight2);
+}
+
+.field.freeze {
+  color: var(--colors-leva__highlight1);
 }
