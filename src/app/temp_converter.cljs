@@ -4,11 +4,11 @@
 
 (def defaultState {:val "" :err ""})
 
-(defn c-to-f [temp] (+ 32 (* temp (/ 9 5))))
-(defn f-to-c [temp] (* (- temp 32) (/ 5 9)))
+(defn c-to-f [temp] (Math/ceil (+ 32 (* temp (/ 9 5)))))
+(defn f-to-c [temp] (Math/floor (* (- temp 32) (/ 5 9))))
 
 (defn validNumber? [string]
-  (re-find #"^-?\d*(\.|\.\d+)?$" string))
+  (not (js/Number.isNaN (js/Number string))))
 
 (defn freeze [state key]
   (swap! state assoc-in [key :err] "freeze"))
@@ -23,7 +23,7 @@
         convert-func (case other-key
                        :fah c-to-f
                        :cel f-to-c)]
-    (if (= (count new-value) 0)
+    (if (=  new-value "")
       (do (swap! state assoc key defaultState)
           (freeze state other-key))
       (if (validNumber? new-value)
