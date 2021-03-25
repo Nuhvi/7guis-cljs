@@ -1,7 +1,9 @@
 (ns app.wrapper
-  (:require [clojure.string :as str]))
+  (:require [reagent.core :as r]
+            [clojure.string :as str]))
 
-(defn wrapper [{:keys [title class]} & children]
-  [:div.component {:class (str/lower-case (or class title))}
-   [:p.title title]
-   [:div.content children]])
+(defn wrapper [{:keys [title class]}]
+  (let [this (r/current-component)]
+   [:div.component {:class (str/lower-case (or class title))}
+    [:p.title title]
+    (into  [:div.content] (r/children this))]))

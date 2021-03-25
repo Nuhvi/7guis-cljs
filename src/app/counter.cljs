@@ -5,6 +5,6 @@
   [wrapper {:title "Counter"}
     [:div.row
      [:p "Count:"]
-     [:input.field {:value @click-count}]]
+     [:input.field {:defaultValue @click-count}]]
     [:input {:type "button" :value "Increment"
              :on-click #(swap! click-count inc)}]])
