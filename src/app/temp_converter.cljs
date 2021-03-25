@@ -2,43 +2,61 @@
   (:require [reagent.core :as r]
             [app.wrapper :refer [wrapper]]))
 
-(def defaultState {:val "" :err ""})
+(def default-state {:val "" :err ""})
 
-(defn c-to-f [temp] (Math/ceil (+ 32 (* temp (/ 9 5)))))
-(defn f-to-c [temp] (Math/floor (* (- temp 32) (/ 5 9))))
+(defn sci-format
+"Convert to the scientific notation if the number is >= 10^12"
+  [number]
+  (if (>= number 1e12)
+    (.toExponential number 6)
+    number))
 
-(defn validNumber? [string]
+(defn c-to-f
+"Contvert celsius to fahrenheit"
+  [temp]
+  (sci-format (Math/ceil (+ 32 (* temp (/ 9 5))))))
+(defn f-to-c
+"Contvert fahrenheit to celsius "
+  [temp]
+  (sci-format(Math/floor  (* (- temp 32) (/ 5 9)))))
+
+(defn validNumber?
+"Check that input string is a valid Number"
+  [string]
   (not (js/Number.isNaN (js/Number string))))
 
-(defn freeze [state key]
+(defn freeze 
+"Set the :err in a target state to 'freeze'"
+  [state key]
   (swap! state assoc-in [key :err] "freeze"))
 
 (defn on-change
   "Mutate the state atom of the temperature converter according to passed key"
   [e state key]
-  (let [new-value (-> e .-target .-value)
+  (let [new-val (-> e .-target .-value)
         other-key (case key
                     :cel :fah
                     :fah :cel)
         convert-func (case other-key
                        :fah c-to-f
                        :cel f-to-c)]
-    (if (=  new-value "")
-      (do (swap! state assoc key defaultState)
+    (if (=  new-val "")
+      (do (swap! state assoc key default-state)
           (freeze state other-key))
-      (if (validNumber? new-value)
-        (reset! state {key {:val new-value :err ""}
-                       other-key {:val (convert-func new-value) :err ""}})
+      (if (validNumber? new-val)
+      (do 
+        (swap! state assoc key {:val new-val :err ""})
+        (swap! state assoc other-key {:val (convert-func new-val) :err ""}))
         (do
           (freeze state other-key)
-          (swap! state assoc key {:val new-value :err "invalid"}))))))
+          (swap! state assoc key {:val new-val :err "invalid"}))))))
 
 (defn converter []
-  (let [state (r/atom {:cel defaultState :fah defaultState})]
+  (let [state (r/atom {:cel default-state :fah default-state})]
     (fn []
       [wrapper {:title "Temperature Converter" :class "converter"}
        [:div.row
-        [:p "Celsius"]
+        [:p "Celsius:"]
         [:input.field.celsius
          {:class (str (:err (:cel @state)))
           :data-testid "celsius"
@@ -46,7 +64,7 @@
           :value (:val (:cel @state))
           :on-change #(on-change % state :cel)}]]
        [:div.row
-        [:p "Fahrenheit"]
+        [:p "Fahrenheit:"]
         [:input.field.fahrenheit
          {:class (str (:err (:fah @state)))
           :type "text"
