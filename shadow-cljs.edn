@@ -2,7 +2,7 @@
  {:app {:asset-path "/js"
         :modules {:main {:init-fn app.core/main}}
         :output-dir "public/js"
-        :target :browser}
+        :target :browser}}
  :dependencies [[reagent "0.8.1"]
                 [devcards "0.2.6"]]
  :dev-http {3000 "public"}
