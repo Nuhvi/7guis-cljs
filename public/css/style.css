@@ -117,7 +117,7 @@ input[type='button']:focus {
   color: var(--colors-leva__highlight2);
 }
 
-.field.disable {
+.field.disabled {
   color: var(--colors-leva__highlight1);
   pointer-events: none;
 }

@@ -34,31 +34,31 @@
    Math/round
    sci-format))
 
-(defn disable 
-"Set the :err in a target state to 'disable'"
+(defn disable
+  "Set the :err in a target state to 'disabled'"
   [state key]
-  (swap! state assoc-in [key :err] "disable"))
+  (assoc (key @state) :err "disabled"))
 
 (def default-state {:val "" :err ""})
 
-(defn on-change
+(defn change-handler
   "Mutate the state atom of the temperature converter according to passed key"
-  [e state key]
+  [key state e]
   (let [new-val (-> e .-target .-value)
         other-key (case key
                     :cel :fah
                     :fah :cel)]
     (if (= new-val "")
-      (do (swap! state assoc key default-state)
-          (disable state other-key))
+      (reset! state
+              {key default-state
+               other-key (disable state other-key)})
       (if (numeric? new-val)
-        (do
-          (swap! state assoc key {:val new-val :err ""})
-          (swap! state assoc other-key
-                 {:val (convert other-key new-val) :err ""}))
-        (do
-          (swap! state assoc key {:val new-val :err "invalid"})
-          (disable state other-key))))))
+        (reset! state
+                {key {:val new-val :err ""}
+                 other-key {:val (convert other-key new-val) :err ""}})
+        (reset! state
+                {key {:val new-val :err "invalid"}
+                 other-key (disable state other-key)})))))
 
 (defn converter []
   (let [state (r/atom {:cel default-state :fah default-state})]
@@ -67,15 +67,15 @@
        [:div.row
         [:p "Celsius:"]
         [:input.field.celsius
-         {:class (str (:err (:cel @state)))
+         {:class (-> @state :cel :err str)
           :data-testid "celsius"
           :type "text"
-          :value (:val (:cel @state))
-          :on-change #(on-change % state :cel)}]]
+          :value (-> @state :cel :val)
+          :on-change #(change-handler :cel state %)}]]
        [:div.row
         [:p "Fahrenheit:"]
         [:input.field.fahrenheit
-         {:class (str (:err (:fah @state)))
+         {:class (-> @state :fah :err str)
           :type "text"
-          :value (:val (:fah @state))
-          :on-change #(on-change % state :fah)}]]])))
+          :value (-> @state :fah :val)
+          :on-change #(change-handler :fah state %)}]]])))
