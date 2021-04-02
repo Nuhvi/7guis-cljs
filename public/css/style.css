@@ -23,9 +23,6 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-
-  background-color: rgb(153, 153, 153);
-  border: 2px solid rgb(102, 102, 102);
 }
 
 .component {
@@ -77,6 +74,11 @@ input[type='button']:focus {
   box-shadow: 0 0 0 var(--borderWidths-leva__focus) var(--colors-leva__accent2);
 }
 
+input[type='button'][disabled] {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
 .row {
   display: flex;
   align-items: baseline;
@@ -87,7 +89,7 @@ input[type='button']:focus {
   color: var(--colors-leva__highlight2);
 }
 
-.row:hover,
+.row:not(.disabled):hover,
 .row:focus-within {
   color: var(--colors-leva__highlight3);
 }
@@ -99,6 +101,7 @@ input[type='button']:focus {
 .field {
   background-color: var(--colors-leva__elevation3);
   line-height: var(--sizes-leva__rowHeight);
+  height: var(--sizes-leva__rowHeight);
   padding: 0 1em;
   text-align: right;
   color: inherit;
@@ -112,12 +115,22 @@ input[type='button']:focus {
     var(--colors-leva__elevation1);
 }
 
-.field.invalid {
-  box-shadow: inset 0 0 6px rgb(122, 17, 17);
+.invalid {
   color: var(--colors-leva__highlight2);
 }
 
-.field.disabled {
+.invalid .field,
+.field.invalid {
+  box-shadow: inset 0 0 6px rgb(122, 17, 17);
+}
+
+.disabled {
   color: var(--colors-leva__highlight1);
   pointer-events: none;
+}
+
+.row.disabled .field,
+.field.disabled {
+  background-color: var(--colors-leva__elevation1);
+  box-shadow: none;
 }

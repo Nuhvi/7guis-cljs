@@ -1,26 +1,22 @@
 (ns app.temp-converter
   (:require [reagent.core :as r]
-            [app.wrapper :refer [wrapper]]))
-
-(defn numeric?
-"Check that input string is a valid Number"
-  [string]
-  (not (js/Number.isNaN (js/Number string))))
+            [app.wrapper :refer [wrapper]]
+            [app.utils :as u]))
 
 (defn sci-format
-"Convert to the scientific notation if the number is >= 10^12"
+  "Convert to the scientific notation if the number is >= 10^12"
   [number]
   (if (>= number 1e12)
     (.toExponential number 6)
     number))
 
 (defn c-to-f
-"Contvert celsius to fahrenheit"
+  "Contvert celsius to fahrenheit"
   [c]
   (+ 32 (* c (/ 9 5))))
 
 (defn f-to-c
-"Contvert fahrenheit to celsius "
+  "Contvert fahrenheit to celsius "
   [f]
   (* (- f 32) (/ 5 9)))
 
@@ -52,7 +48,7 @@
       (reset! state
               {key default-state
                other-key (disable state other-key)})
-      (if (numeric? new-val)
+      (if (u/numeric? new-val)
         (reset! state
                 {key {:val new-val :err ""}
                  other-key {:val (convert other-key new-val) :err ""}})
@@ -64,18 +60,13 @@
   (let [state (r/atom {:cel default-state :fah default-state})]
     (fn []
       [wrapper {:title "Temperature Converter" :class "converter"}
-       [:div.row
+       [:div.row {:class (-> @state :cel :err str)}
         [:p "Celsius:"]
         [:input.field.celsius
-         {:class (-> @state :cel :err str)
-          :data-testid "celsius"
-          :type "text"
-          :value (-> @state :cel :val)
+         {:value (-> @state :cel :val)
           :on-change #(change-handler :cel state %)}]]
-       [:div.row
+       [:div.row {:class (-> @state :fah :err str)}
         [:p "Fahrenheit:"]
         [:input.field.fahrenheit
-         {:class (-> @state :fah :err str)
-          :type "text"
-          :value (-> @state :fah :val)
+         {:value (-> @state :fah :val)
           :on-change #(change-handler :fah state %)}]]])))

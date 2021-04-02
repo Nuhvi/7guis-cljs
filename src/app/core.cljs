@@ -2,16 +2,14 @@
   "This namespace contains your application and is the entrypoint for 'yarn start'."
   (:require [reagent.core :as r]
             [app.counter :refer [counter]]
-            [app.temp-converter :refer [converter]]))
-
-(def app-state 
-  (r/atom 
-   {:count 0}))
+            [app.temp-converter :refer [converter]]
+            [app.flight-booker :refer [booker]]))
 
 (defn app []
   [:main.app
    [counter (r/atom 0)]
-   [converter]])
+   [converter]
+   [booker]])
 
 (defn ^:dev/after-load render
   "Render the toplevel component for this app."
