@@ -4,8 +4,7 @@
 ; Please see https://calva.io/output/ for more info.
 ; Happy coding! ♥️
 
-; Jacking in...
-; Starting Jack-in Terminal: npx shadow-cljs -d cider/cider-nrepl:0.25.8 watch :app
+; Connecting ...
 ; Hooking up nREPL sessions...
 ; Connected session: clj
 ; TIPS: 
@@ -15,516 +14,64 @@
 ;   - `alt+up` and `alt+down` traverse up and down the REPL command history
 ;      when the cursor is after the last contents at the prompt
 ;   - Clojure lines in stack traces are peekable and clickable.
-clj꞉shadow.user꞉> 
+clj꞉shadow.user꞉>  ; Use `alt+enter` to evaluate
 ; Creating cljs repl session...
 ; Connecting cljs repl: shadow-cljs...
 ;   The Calva Connection Log might have more connection progress information.
 ; [:browser-repl] Configuring build.
-()
 ; [:browser-repl] Compiling ...
-; [:browser-repl] Build completed. (129 files, 0 compiled, 0 warnings, 3.11s)
+; [:browser-repl] Build completed. (129 files, 0 compiled, 0 warnings, 0.88s)
 ; Connected session: cljs, repl: browser-repl
 ; TIPS: You can choose which REPL to use (clj or cljs):
 ;    *Calva: Toggle REPL connection*
 ;    (There is a button in the status bar for this)
-; Jack-in done.
+(* 100 20)
+20
+cljs꞉cljs.user꞉>  ; Use `alt+enter` to evaluate
+(* 100 20)
+2000
 cljs꞉cljs.user꞉> 
-(ns app.flight-booker)
-nil
-cljs꞉app.flight-booker꞉> 
-date
-nil
-; ------ WARNING - :undeclared-var -----------------------------------------------
-;  Resource: <eval>:1:1
- Use of undeclared Var app.flight-booker/date
---------------------------------------------------------------------------------
-
-cljs꞉app.flight-booker꞉> 
-date-format
-nil
-; ------ WARNING - :undeclared-var -----------------------------------------------
-;  Resource: <eval>:1:1
- Use of undeclared Var app.flight-booker/date-format
---------------------------------------------------------------------------------
-
-cljs꞉app.flight-booker꞉> 
-#'app.flight-booker/date-format
-cljs꞉app.flight-booker꞉> 
-date
-nil
-; ------ WARNING - :undeclared-var -----------------------------------------------
-;  Resource: <eval>:1:1
- Use of undeclared Var app.flight-booker/date
---------------------------------------------------------------------------------
-
-cljs꞉app.flight-booker꞉> 
-date-format
-"dd/MM/yyyy"
-cljs꞉app.flight-booker꞉> 
-nil
-; ------ WARNING - :undeclared-ns ------------------------------------------------
-;  Resource: <eval>:4:17
- No such namespace: tf, could not locate tf.cljs, tf.cljc, or JavaScript source providing "tf"
---------------------------------------------------------------------------------
-
-; ------ WARNING - :undeclared-var -----------------------------------------------
-;  Resource: <eval>:4:17
- Use of undeclared Var tf/parse
---------------------------------------------------------------------------------
-
-; ------ WARNING - :undeclared-ns ------------------------------------------------
-;  Resource: <eval>:4:27
- No such namespace: tf, could not locate tf.cljs, tf.cljc, or JavaScript source providing "tf"
---------------------------------------------------------------------------------
-
-; ------ WARNING - :undeclared-var -----------------------------------------------
-;  Resource: <eval>:4:27
- Use of undeclared Var tf/formatter
---------------------------------------------------------------------------------
-
-cljs꞉app.flight-booker꞉> 
-nil
-; ------ WARNING - :undeclared-ns ------------------------------------------------
-;  Resource: <eval>:4:17
- No such namespace: tf, could not locate tf.cljs, tf.cljc, or JavaScript source providing "tf"
---------------------------------------------------------------------------------
-
-; ------ WARNING - :undeclared-var -----------------------------------------------
-;  Resource: <eval>:4:17
- Use of undeclared Var tf/parse
---------------------------------------------------------------------------------
-
-; ------ WARNING - :undeclared-ns ------------------------------------------------
-;  Resource: <eval>:4:27
- No such namespace: tf, could not locate tf.cljs, tf.cljc, or JavaScript source providing "tf"
---------------------------------------------------------------------------------
-
-; ------ WARNING - :undeclared-var -----------------------------------------------
-;  Resource: <eval>:4:27
- Use of undeclared Var tf/formatter
---------------------------------------------------------------------------------
-
-cljs꞉app.flight-booker꞉> 
-nil
-; ------ WARNING - :undeclared-ns ------------------------------------------------
-;  Resource: <eval>:1:1
- No such namespace: tf, could not locate tf.cljs, tf.cljc, or JavaScript source providing "tf"
---------------------------------------------------------------------------------
-
-; ------ WARNING - :undeclared-var -----------------------------------------------
-;  Resource: <eval>:1:1
- Use of undeclared Var tf/parse
---------------------------------------------------------------------------------
-
-cljs꞉app.flight-booker꞉> 
-nil
-; ------ WARNING - :undeclared-var -----------------------------------------------
-;  Resource: <eval>:1:1
- Use of undeclared Var app.flight-booker/result
---------------------------------------------------------------------------------
-
-cljs꞉app.flight-booker꞉> 
-(not (is-valid-date? "03//2020"))
-#object[TypeError TypeError: Cannot read property 'call' of undefined]
-cljs꞉app.flight-booker꞉> 
-(not (is-valid-date? "03//2020"))
-nil
-cljs꞉app.flight-booker꞉> 
-(not (is-valid-date? "03//2020"))
-#object[TypeError TypeError: Cannot read property 'call' of undefined]
-cljs꞉app.flight-booker꞉> 
-
- (is-valid-date? "03//2020")
-#object[TypeError TypeError: Cannot read property 'call' of undefined]
-cljs꞉app.flight-booker꞉> 
-(catch (is-valid-date? "03//2020"))
-nil
-; ------ WARNING - :undeclared-var -----------------------------------------------
-;  Resource: <eval>:1:2
- Use of undeclared Var app.flight-booker/catch
---------------------------------------------------------------------------------
-cljs꞉app.flight-booker꞉> 
- (is-valid-date? "03//2020")
-#object[TypeError TypeError: Cannot read property 'call' of undefined]
-cljs꞉app.flight-booker꞉> 
-
- (is-valid-date? "03/0/2020")
-#object[TypeError TypeError: Cannot read property 'call' of undefined]
-cljs꞉app.flight-booker꞉> 
-(tf/parse (tf/formatter "dd/mm/yyyy"))
-nil
-; ------ WARNING - :undeclared-ns ------------------------------------------------
-;  Resource: <eval>:1:2
- No such namespace: tf, could not locate tf.cljs, tf.cljc, or JavaScript source providing "tf"
---------------------------------------------------------------------------------
-
-; ------ WARNING - :undeclared-var -----------------------------------------------
-;  Resource: <eval>:1:2
- Use of undeclared Var tf/parse
---------------------------------------------------------------------------------
-
-; ------ WARNING - :undeclared-ns ------------------------------------------------
-;  Resource: <eval>:1:12
- No such namespace: tf, could not locate tf.cljs, tf.cljc, or JavaScript source providing "tf"
---------------------------------------------------------------------------------
-
-; ------ WARNING - :undeclared-var -----------------------------------------------
-;  Resource: <eval>:1:12
- Use of undeclared Var tf/formatter
---------------------------------------------------------------------------------
-
-cljs꞉app.flight-booker꞉> 
+(-> (/ 5 10 ) (* 100))
+50
+cljs꞉cljs.user꞉> 
+#'app.timer/text-precentage
+cljs꞉app.timer꞉> 
+(text-precentage [5 10])
 nil
 ; ------ WARNING - :fn-arity -----------------------------------------------------
 ;  Resource: <eval>:1:1
- Wrong number of args (4) passed to :require
+ Wrong number of args (1) passed to app.timer/text-precentage
 --------------------------------------------------------------------------------
 
-; ------ WARNING - :undeclared-var -----------------------------------------------
-;  Resource: <eval>:1:29
- Use of undeclared Var app.flight-booker/r
---------------------------------------------------------------------------------
+cljs꞉app.timer꞉> 
 
-; ------ WARNING - :undeclared-var -----------------------------------------------
-;  Resource: <eval>:3:33
- Use of undeclared Var app.flight-booker/t
---------------------------------------------------------------------------------
-
-; ------ WARNING - :undeclared-var -----------------------------------------------
-;  Resource: <eval>:4:35
- Use of undeclared Var app.flight-booker/tf
---------------------------------------------------------------------------------
-
-cljs꞉app.flight-booker꞉> 
-nil
-cljs꞉app.flight-booker꞉> 
-nil
-cljs꞉app.flight-booker꞉> 
-nil
-cljs꞉app.flight-booker꞉> 
-nil
-cljs꞉app.flight-booker꞉> (tf/parse (tf/formatter "dd/mm/yyyy"))
-nil
-cljs꞉app.flight-booker꞉> 
-(println nil)
-nil
-
-nil
-cljs꞉app.flight-booker꞉> 
-#'app.flight-booker/is-valid-date?
-cljs꞉app.flight-booker꞉> 
-(tf/parse (tf/formatter "dd/mm/yyyy") "02/02/2021")
-#object[Object 20210102T000200]
-cljs꞉app.flight-booker꞉> 
-(tf/parse (tf/formatter "dd/mm/yyyy") "02/0/2021")
-#object[Object 20210102T000000]
-cljs꞉app.flight-booker꞉> 
-(tf/formatter-local)
-nil
-; ------ WARNING - :fn-arity -----------------------------------------------------
-;  Resource: <eval>:1:1
- Wrong number of args (0) passed to cljs-time.format/formatter-local
---------------------------------------------------------------------------------
-
-cljs꞉app.flight-booker꞉> 
-(tf/formatter-local "dd/mm/yyyy")
-nil
-#cljs-time.format.Formatter{:format-str "dd/mm/yyyy", :overrides {"Z" #object[G__35719], "ZZ" #object[G__35719]}, :default-year nil, :timezone nil}
-cljs꞉app.flight-booker꞉> 
-(tf/parse (tf/formatter "dd/mm/yyyy") "02/00/2021")
-nil
-; ------ WARNING - :undeclared-ns ------------------------------------------------
-;  Resource: <eval>:1:2
- No such namespace: tf, could not locate tf.cljs, tf.cljc, or JavaScript source providing "tf"
---------------------------------------------------------------------------------
-
-; ------ WARNING - :undeclared-var -----------------------------------------------
-;  Resource: <eval>:1:2
- Use of undeclared Var tf/parse
---------------------------------------------------------------------------------
-
-; ------ WARNING - :undeclared-ns ------------------------------------------------
-;  Resource: <eval>:1:12
- No such namespace: tf, could not locate tf.cljs, tf.cljc, or JavaScript source providing "tf"
---------------------------------------------------------------------------------
-
-; ------ WARNING - :undeclared-var -----------------------------------------------
-;  Resource: <eval>:1:12
- Use of undeclared Var tf/formatter
---------------------------------------------------------------------------------
-
-cljs꞉app.temp-converter꞉> (ns app.flight-booker)
-nil
-cljs꞉app.flight-booker꞉> 
-(tf/parse (tf/formatter "dd/mm/yyyy") "02/00/2021")
-#object[Object 20210102T000000]
-cljs꞉app.flight-booker꞉> 
-
-(tf/unparse {:format-str "dd/mm/yyyy"} (tf/parse (tf/formatter "dd/mm/yyyy") "02/00/2021"))
-"02/00/2021"
-cljs꞉app.flight-booker꞉> 
-(tf/unparse {:format-str "dd/MM/yyyy"} (tf/parse (tf/formatter "dd/MM/yyyy") "02/00/2021"))
-#error {:message "Date is not valid", :data {:type :invalid-date, :date {:days 2, :months 0, :years 2021}, :errors {:months 0}}}
-cljs꞉app.flight-booker꞉> 
-(tf/parse (tf/formatter "dd/MM/yyyy") "02/00/2021")
-#error {:message "Date is not valid", :data {:type :invalid-date, :date {:days 2, :months 0, :years 2021}, :errors {:months 0}}}
-cljs꞉app.flight-booker꞉> 
-(:errors (tf/parse (tf/formatter "dd/MM/yyyy") "02/00/2021"))
-#error {:message "Date is not valid", :data {:type :invalid-date, :date {:days 2, :months 0, :years 2021}, :errors {:months 0}}}
-cljs꞉app.flight-booker꞉> 
-(js/try (tf/parse (tf/formatter "dd/MM/yyyy") "02/00/2021"))
-#object[ReferenceError ReferenceError: try$ is not defined]
-cljs꞉app.flight-booker꞉> 
-(try (tf/parse (tf/formatter "dd/MM/yyyy") "02/00/2021"))
-#error {:message "Date is not valid", :data {:type :invalid-date, :date {:days 2, :months 0, :years 2021}, :errors {:months 0}}}
-cljs꞉app.flight-booker꞉> 
-(try (tf/parse (tf/formatter "dd/MM/yyyy") "02/00/2021") (println "got error"))
-#error {:message "Date is not valid", :data {:type :invalid-date, :date {:days 2, :months 0, :years 2021}, :errors {:months 0}}}
-cljs꞉app.flight-booker꞉> 
-(try (tf/parse (tf/formatter "dd/MM/yyyy") "02/00/2021") 
-     (catch :default e #(println "got error: " %)))
-#object[Function]
-cljs꞉app.flight-booker꞉> 
-(try (tf/parse (tf/formatter "dd/MM/yyyy") "02/00/2021") 
-     (catch :default e (println "got error: " e)))
-got error:  #error {:message Date is not valid, :data {:type :invalid-date, :date {:days 2, :months 0, :years 2021}, :errors {:months 0}}}
-
-nil
-cljs꞉app.flight-booker꞉> 
-(try (tf/parse (tf/formatter "dd/MM/yyyy") "02/00/2021") 
-     (catch js/Error e (println "got error: " e)))
-got error:  #error {:message Date is not valid, :data {:type :invalid-date, :date {:days 2, :months 0, :years 2021}, :errors {:months 0}}}
-
-nil
-cljs꞉app.flight-booker꞉> 
-(try (tf/parse (tf/formatter "dd/MM/yyyy") "02/00/2021") 
-     (catch js/Error e false?)
-     (finally true))
-got error:  #error {:message Date is not valid, :data {:type :invalid-date, :date {:days 2, :months 0, :years 2021}, :errors {:months 0}}}
-
-nil
-cljs꞉app.flight-booker꞉> 
-(try (tf/parse (tf/formatter "dd/MM/yyyy") "02/00/2021") 
-     (catch js/Error e false?)
-     (finally true))
-#object[cljs$core$false_QMARK_]
-cljs꞉app.flight-booker꞉> 
-(try (tf/parse (tf/formatter "dd/MM/yyyy") "02/00/2021") 
-     (catch js/Error e false)
-     (finally true))
-false
-cljs꞉app.flight-booker꞉> 
-
-(try (tf/parse (tf/formatter "dd/MM/yyyy") "02/01/2021") 
-     (catch js/Error e false)
-     (finally true))
-#object[Object 20210102T000000]
-cljs꞉app.flight-booker꞉> 
-#'app.flight-booker/date-formatter
-cljs꞉app.flight-booker꞉> 
-#'app.flight-booker/invalid-date?
-cljs꞉app.flight-booker꞉> 
-(true? "fstars")
-false
-cljs꞉app.flight-booker꞉> 
-(truth_ "satrst")
-nil
-; ------ REPL Error while processing ---------------------------------------------
-; (truth_ "satrst")
-Encountered error when macroexpanding cljs.core/truth_.
-AssertionError: Assert failed: x is substituted twice
-(core/symbol? x)
-	cljs.core/truth- (core.cljc:932)
-	cljs.core/truth- (core.cljc:931)
-	clojure.core/apply (core.clj:669)
-	clojure.core/apply (core.clj:660)
-	cljs.analyzer/macroexpand-1*/fn--2622 (analyzer.cljc:3919)
-	cljs.analyzer/macroexpand-1* (analyzer.cljc:3917)
-	cljs.analyzer/macroexpand-1* (analyzer.cljc:3904)
-	cljs.analyzer/macroexpand-1 (analyzer.cljc:3968)
-	cljs.analyzer/macroexpand-1 (analyzer.cljc:3964)
-	cljs.analyzer/analyze-seq (analyzer.cljc:4001)
-	cljs.analyzer/analyze-seq (analyzer.cljc:3981)
-	cljs.analyzer/analyze-form (analyzer.cljc:4190)
-	cljs.analyzer/analyze-form (analyzer.cljc:4187)
-	cljs.analyzer/analyze* (analyzer.cljc:4243)
-	cljs.analyzer/analyze* (analyzer.cljc:4235)
-	shadow.build.compiler/analyze/fn--12958 (compiler.clj:251)
-	shadow.build.compiler/analyze (compiler.clj:239)
-	shadow.build.compiler/analyze (compiler.clj:198)
-	shadow.cljs.repl/repl-compile/fn--14387/fn--14388 (repl.clj:459)
-	shadow.cljs.repl/repl-compile/fn--14387 (repl.clj:432)
-	shadow.cljs.repl/repl-compile (repl.clj:430)
-	shadow.cljs.repl/repl-compile (repl.clj:427)
-	shadow.cljs.repl/process-read-result (repl.clj:518)
-	shadow.cljs.repl/process-read-result (repl.clj:494)
-	shadow.cljs.repl/process-input (repl.clj:674)
-	shadow.cljs.repl/process-input (repl.clj:658)
-	shadow.cljs.devtools.server.worker.impl/fn--15144 (impl.clj:755)
-	shadow.cljs.devtools.server.worker.impl/fn--15144 (impl.clj:745)
-	clojure.lang.MultiFn.invoke (MultiFn.java:234)
-	shadow.cljs.devtools.server.util/server-thread/fn--14807/fn--14808/fn--14816 (util.clj:285)
-	shadow.cljs.devtools.server.util/server-thread/fn--14807/fn--14808 (util.clj:284)
-	shadow.cljs.devtools.server.util/server-thread/fn--14807 (util.clj:257)
-	java.lang.Thread.run (Thread.java:834)
-
-cljs꞉app.flight-booker꞉> 
-(truth_ "x")
-nil
-; ------ REPL Error while processing ---------------------------------------------
-; (truth_ "x")
-Encountered error when macroexpanding cljs.core/truth_.
-AssertionError: Assert failed: x is substituted twice
-(core/symbol? x)
-	cljs.core/truth- (core.cljc:932)
-	cljs.core/truth- (core.cljc:931)
-	clojure.core/apply (core.clj:669)
-	clojure.core/apply (core.clj:660)
-	cljs.analyzer/macroexpand-1*/fn--2622 (analyzer.cljc:3919)
-	cljs.analyzer/macroexpand-1* (analyzer.cljc:3917)
-	cljs.analyzer/macroexpand-1* (analyzer.cljc:3904)
-	cljs.analyzer/macroexpand-1 (analyzer.cljc:3968)
-	cljs.analyzer/macroexpand-1 (analyzer.cljc:3964)
-	cljs.analyzer/analyze-seq (analyzer.cljc:4001)
-	cljs.analyzer/analyze-seq (analyzer.cljc:3981)
-	cljs.analyzer/analyze-form (analyzer.cljc:4190)
-	cljs.analyzer/analyze-form (analyzer.cljc:4187)
-	cljs.analyzer/analyze* (analyzer.cljc:4243)
-	cljs.analyzer/analyze* (analyzer.cljc:4235)
-	shadow.build.compiler/analyze/fn--12958 (compiler.clj:251)
-	shadow.build.compiler/analyze (compiler.clj:239)
-	shadow.build.compiler/analyze (compiler.clj:198)
-	shadow.cljs.repl/repl-compile/fn--14387/fn--14388 (repl.clj:459)
-	shadow.cljs.repl/repl-compile/fn--14387 (repl.clj:432)
-	shadow.cljs.repl/repl-compile (repl.clj:430)
-	shadow.cljs.repl/repl-compile (repl.clj:427)
-	shadow.cljs.repl/process-read-result (repl.clj:518)
-	shadow.cljs.repl/process-read-result (repl.clj:494)
-	shadow.cljs.repl/process-input (repl.clj:674)
-	shadow.cljs.repl/process-input (repl.clj:658)
-	shadow.cljs.devtools.server.worker.impl/fn--15144 (impl.clj:755)
-	shadow.cljs.devtools.server.worker.impl/fn--15144 (impl.clj:745)
-	clojure.lang.MultiFn.invoke (MultiFn.java:234)
-	shadow.cljs.devtools.server.util/server-thread/fn--14807/fn--14808/fn--14816 (util.clj:285)
-	shadow.cljs.devtools.server.util/server-thread/fn--14807/fn--14808 (util.clj:284)
-	shadow.cljs.devtools.server.util/server-thread/fn--14807 (util.clj:257)
-	java.lang.Thread.run (Thread.java:834)
-
-cljs꞉app.flight-booker꞉> 
-(truth_ 2)
-nil
-; ------ REPL Error while processing ---------------------------------------------
-; (truth_ 2)
-Encountered error when macroexpanding cljs.core/truth_.
-AssertionError: Assert failed: x is substituted twice
-(core/symbol? x)
-	cljs.core/truth- (core.cljc:932)
-	cljs.core/truth- (core.cljc:931)
-	clojure.core/apply (core.clj:669)
-	clojure.core/apply (core.clj:660)
-	cljs.analyzer/macroexpand-1*/fn--2622 (analyzer.cljc:3919)
-	cljs.analyzer/macroexpand-1* (analyzer.cljc:3917)
-	cljs.analyzer/macroexpand-1* (analyzer.cljc:3904)
-	cljs.analyzer/macroexpand-1 (analyzer.cljc:3968)
-	cljs.analyzer/macroexpand-1 (analyzer.cljc:3964)
-	cljs.analyzer/analyze-seq (analyzer.cljc:4001)
-	cljs.analyzer/analyze-seq (analyzer.cljc:3981)
-	cljs.analyzer/analyze-form (analyzer.cljc:4190)
-	cljs.analyzer/analyze-form (analyzer.cljc:4187)
-	cljs.analyzer/analyze* (analyzer.cljc:4243)
-	cljs.analyzer/analyze* (analyzer.cljc:4235)
-	shadow.build.compiler/analyze/fn--12958 (compiler.clj:251)
-	shadow.build.compiler/analyze (compiler.clj:239)
-	shadow.build.compiler/analyze (compiler.clj:198)
-	shadow.cljs.repl/repl-compile/fn--14387/fn--14388 (repl.clj:459)
-	shadow.cljs.repl/repl-compile/fn--14387 (repl.clj:432)
-	shadow.cljs.repl/repl-compile (repl.clj:430)
-	shadow.cljs.repl/repl-compile (repl.clj:427)
-	shadow.cljs.repl/process-read-result (repl.clj:518)
-	shadow.cljs.repl/process-read-result (repl.clj:494)
-	shadow.cljs.repl/process-input (repl.clj:674)
-	shadow.cljs.repl/process-input (repl.clj:658)
-	shadow.cljs.devtools.server.worker.impl/fn--15144 (impl.clj:755)
-	shadow.cljs.devtools.server.worker.impl/fn--15144 (impl.clj:745)
-	clojure.lang.MultiFn.invoke (MultiFn.java:234)
-	shadow.cljs.devtools.server.util/server-thread/fn--14807/fn--14808/fn--14816 (util.clj:285)
-	shadow.cljs.devtools.server.util/server-thread/fn--14807/fn--14808 (util.clj:284)
-	shadow.cljs.devtools.server.util/server-thread/fn--14807 (util.clj:257)
-	java.lang.Thread.run (Thread.java:834)
-
-cljs꞉app.flight-booker꞉> 
-(not x)
-nil
-; ------ WARNING - :undeclared-var -----------------------------------------------
-;  Resource: <eval>:1:6
- Use of undeclared Var app.flight-booker/x
---------------------------------------------------------------------------------
-
-cljs꞉app.flight-booker꞉> 
-(not "x")
-false
-cljs꞉app.flight-booker꞉> 
-#'app.flight-booker/parse-date
-cljs꞉app.flight-booker꞉> 
-(parse-date "01/02/21")
-#error {:message "Quoted text not found", :data {:type :parse-error, :where :parse-quoted}}
-cljs꞉app.flight-booker꞉> 
-#'app.flight-booker/date-format
-cljs꞉app.flight-booker꞉> 
-(tf/parse date-format "01/02/21")
-#error {:message "Quoted text not found", :data {:type :parse-error, :where :parse-quoted}}
-cljs꞉app.flight-booker꞉> 
-(tf/parse date-format "01/02/2021")
-#error {:message "Quoted text not found", :data {:type :parse-error, :where :parse-quoted}}
-cljs꞉app.flight-booker꞉> 
-date-format
-"dd/MM/yyyy"
-cljs꞉app.flight-booker꞉> 
-(tf/parse "dd/MM/yyyy" "01/01/1997")
-#error {:message "Quoted text not found", :data {:type :parse-error, :where :parse-quoted}}
-cljs꞉app.flight-booker꞉> tf/parse
-#object[cljs_time$format$parse]
-cljs꞉app.flight-booker꞉> 
-#'app.flight-booker/parse-date
-cljs꞉app.flight-booker꞉> 
-(def date (parse-date "01/02/20"))
-#object[Object 20200201T000000]
-cljs꞉app.flight-booker꞉> 
-#'app.flight-booker/date
-cljs꞉app.flight-booker꞉> 
-(t/in-millis date)
-#object[Error Error: No protocol method InTimeUnitProtocol.in-millis defined for type object: 20200201T000000]
-cljs꞉app.flight-booker꞉> 
-date
-#object[Object 20200201T000000]
-cljs꞉app.flight-booker꞉> 
-(js/Number date)
-#object[Object 20200201T000000]
-cljs꞉app.flight-booker꞉> 
-(t/->Period date )
-nil
-; ------ WARNING - :fn-arity -----------------------------------------------------
-;  Resource: <eval>:1:1
- Wrong number of args (1) passed to cljs-time.core/->Period
---------------------------------------------------------------------------------
-
-cljs꞉app.flight-booker꞉> 
-(def dep (parse-date "02/05/2022"))
-#'app.flight-booker/dep
-cljs꞉app.flight-booker꞉> 
-(def dep (parse-date "02/04/2021"))
-#'app.flight-booker/dep
-cljs꞉app.flight-booker꞉> 
-
-(def dep (parse-date "02/05/2022"))
-#'app.flight-booker/dep
-cljs꞉app.flight-booker꞉> 
-(def ret (parse-date "02/04/2021"))
-#'app.flight-booker/ret
-cljs꞉app.flight-booker꞉> 
-(t/after? dep ret)
-true
-cljs꞉app.flight-booker꞉> 
-(t/after? ret dep)
-false
-cljs꞉app.flight-booker꞉> 
+(text-precentage 5 10)
+:shadow.cljs/print-error!
+; The result object failed to print. It is available via *1 if you want to interact with it.
+; The exception was: 
+; Error: 50 is not ISeqable
+cljs꞉app.timer꞉> 
+*1
+:shadow.cljs/print-error!
+; The result object failed to print. It is available via *1 if you want to interact with it.
+; The exception was: 
+; Error: 50 is not ISeqable
+cljs꞉app.timer꞉> 
+(str "10" "%")
+"10%"
+cljs꞉app.timer꞉> 
+(str (/ 5 10) "%")
+"0.5%"
+cljs꞉app.timer꞉> 
+(str (*(/ 5 10) 100) "%")
+"50%"
+cljs꞉app.timer꞉> 
+(defn x [a b] 
+(str (*(/ a b) 100) "%")
+  )
+#'app.timer/x
+cljs꞉app.timer꞉> 
+(x 5 10)
+"50%"
+cljs꞉app.timer꞉> 
+; nREPL Connection was closed

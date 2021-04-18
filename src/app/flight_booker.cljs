@@ -72,20 +72,20 @@
         [:p "Type: "]
         [:select.field.type
          {:value (:type @state)
-          :on-change #(change-type state (-> % .-target.value))}
+          :on-change #(change-type state (-> % .-target .-value))}
          [:option {:value "one-way"} "One-way"]
          [:option {:value "round"} "Round trip"]]]
        [:div.row {:class (if (:invalid-departure? @state) "invalid" "")}
         [:p "Departure date:"]
         [:input.field
          {:value (:departure-date @state)
-          :on-change #(change-departure state (-> % .-target.value))}]]
+          :on-change #(change-departure state (-> % .-target .-value))}]]
        [:div.row {:class [(if (:return-disabled? @state) "disabled" "")
                           (if (:invalid-return? @state) "invalid" "")]}
         [:p "Retrun date:"]
         [:input.field
          {:value (:return-date @state)
-          :on-change #(change-return state (-> % .-target.value))}]]
+          :on-change #(change-return state (-> % .-target .-value))}]]
        [:input
         {:type "button"
          :on-click #(book @state)

@@ -4,8 +4,7 @@
         :output-dir "public/js"
         :target :browser}}
  :dependencies [[reagent "0.8.1"]
-                [com.andrewmcveigh/cljs-time "0.5.2"]
-                [devcards "0.2.6"]]
+                [com.andrewmcveigh/cljs-time "0.5.2"]]
  :dev-http {3000 "public"}
  :nrepl {:port 3333}
  :source-paths ["src"]}

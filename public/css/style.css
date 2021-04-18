@@ -1,4 +1,5 @@
 @import './leva-css-values.css';
+@import './input-range.css';
 
 html,
 body {
@@ -7,33 +8,23 @@ body {
 }
 
 body {
+  background-color: #333;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 12px;
 }
 
-.app {
-  width: 375px;
-  height: 812px;
-  border-radius: var(--radii-leva__lg);
-  overflow: hidden;
-  padding: 1em;
-
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
 .component {
   border-radius: var(--radii-leva__lg);
   background-color: var(--colors-leva__elevation1);
+  box-shadow: var(--shadows-leva__level1);
   color: var(--colors-leva__highlight2);
   width: var(--sizes-leva__rootWidth);
 
   font-family: var(--fonts-leva__mono);
 
-  margin-bottom: 1em;
+  margin-bottom: 2em;
 }
 
 .component * {
@@ -94,12 +85,17 @@ input[type='button'][disabled] {
   color: var(--colors-leva__highlight3);
 }
 
+.row:not(.disabled):hover .field,
+.row:focus-within .field {
+  box-shadow: inset 0 0 0 var(--borderWidths-leva__hover)
+    var(--colors-leva__accent3);
+}
+
 .row .field {
   width: 50%;
 }
 
 .field {
-  background-color: var(--colors-leva__elevation3);
   line-height: var(--sizes-leva__rowHeight);
   height: var(--sizes-leva__rowHeight);
   padding: 0 1em;
@@ -133,4 +129,41 @@ input[type='button'][disabled] {
 .field.disabled {
   background-color: var(--colors-leva__elevation1);
   box-shadow: none;
+}
+
+.meter-slider-container {
+  background-color: var(--colors-leva__elevation3);
+  border-radius: var(--radii-leva__sm);
+  height: 20%;
+}
+
+.meter-slider {
+  min-width: 2px;
+  height: 100%;
+  background-color: var(--colors-leva__accent2);
+  border-radius: var(--radii-leva__sm);
+}
+
+.meter,
+.range {
+  padding: 0;
+  display: grid;
+  grid-template-columns: 4fr 3fr;
+  column-gap: 1em;
+  align-items: center;
+
+  width: 50%;
+}
+
+.meter .field,
+.range .field {
+  padding: 0 0.3em;
+  display: block;
+  width: 100%;
+  pointer-events: none;
+  user-select: none;
+}
+
+.timer .row {
+  align-items: center;
 }

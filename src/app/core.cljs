@@ -3,13 +3,15 @@
   (:require [reagent.core :as r]
             [app.counter :refer [counter]]
             [app.temp-converter :refer [converter]]
-            [app.flight-booker :refer [booker]]))
+            [app.flight-booker :refer [booker]]
+            [app.timer :refer [timer]]))
 
 (defn app []
   [:main.app
    [counter (r/atom 0)]
    [converter]
-   [booker]])
+   [booker]
+   [timer]])
 
 (defn ^:dev/after-load render
   "Render the toplevel component for this app."
