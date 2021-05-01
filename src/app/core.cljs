@@ -4,14 +4,16 @@
             [app.counter :refer [counter]]
             [app.temp-converter :refer [converter]]
             [app.flight-booker :refer [booker]]
-            [app.timer :refer [timer]]))
+            [app.timer :refer [timer]]
+            [app.crud :refer [crud]]))
 
 (defn app []
   [:main.app
-   [counter (r/atom 0)]
+   [counter 0]
    [converter]
    [booker]
-   [timer]])
+   [timer 15]
+   [crud {1 {:fst "Hans" :lst "Emil"}}]])
 
 (defn ^:dev/after-load render
   "Render the toplevel component for this app."
