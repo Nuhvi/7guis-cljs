@@ -53,7 +53,7 @@
       [:div.range
        [:input
         {:type "range" :defaultValue 15 :min 0 :max 30
-         :on-change #(set-duration! state (-> % .-target .-value js/Number))}]
+         :on-change #(set-duration! state (js/Number (.. % -target -value)))}]
        [:input.field
         {:value (secondify (:duration @state)) :readOnly true :tab-index -1}]]]
      [:input

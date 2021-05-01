@@ -1,7 +1,6 @@
 (ns app.temp-converter
   (:require [reagent.core :as r]
-            [app.wrapper :refer [wrapper]]
-            [app.utils :as u]))
+            [app.wrapper :refer [wrapper]]))
 
 (defn sci-format
   "Convert to the scientific notation if the number is >= 10^12"
@@ -37,6 +36,11 @@
 
 (def default-state {:val "" :err ""})
 
+(defn valid-number-string?
+  "Check that input string is a valid Number"
+  [string]
+  (not (js/Number.isNaN (js/Number string))))
+
 (defn update-state!
   "Update the state after validating the new-val"
   [state new-val key opposite-key]
@@ -44,7 +48,7 @@
     (reset! state
             {key default-state
              opposite-key (disable state opposite-key)})
-    (if (u/numeric? new-val)
+    (if (valid-number-string? new-val)
       (reset! state
               {key {:val new-val :err ""}
                opposite-key {:val (convert opposite-key new-val) :err ""}})
@@ -70,9 +74,9 @@
         [:p "Celsius:"]
         [:input.field.celsius
          {:value (-> @state :cel :val)
-          :on-change #(set-celsius! state (-> % .-target .-value))}]]
+          :on-change #(set-celsius! state (.. % -target -value))}]]
        [:div.row {:class (-> @state :fah :err str)}
         [:p "Fahrenheit:"]
         [:input.field.fahrenheit
          {:value (-> @state :fah :val)
-          :on-change #(set-fahrenheit! state (-> % .-target .-value))}]]])))
+          :on-change #(set-fahrenheit! state (.. % -target -value))}]]])))
