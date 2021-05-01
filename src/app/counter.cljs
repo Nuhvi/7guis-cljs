@@ -4,9 +4,10 @@
 
 (defn counter [initial-count]
   (let [click-count (r/atom (or initial-count 0))]
-    [wrapper {:title "Counter"}
-     [:div.row
-      [:p "Count:"]
-      [:input.field {:value @click-count :readOnly true}]]
-     [:input {:type "button" :value "Increment"
-              :on-click #(swap! click-count inc)}]]))
+    (fn []
+      [wrapper {:title "Counter"}
+       [:div.row
+        [:p "Count:"]
+        [:input.field {:value @click-count :readOnly true}]]
+       [:input {:type "button" :value "Increment"
+                :on-click #(swap! click-count inc)}]])))

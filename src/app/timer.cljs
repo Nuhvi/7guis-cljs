@@ -2,7 +2,6 @@
   (:require [reagent.core :as r]
             [app.wrapper :refer [wrapper]]))
 
-(def default-state {:elapsed 0 :duration 15})
 
 (defn percentage 
   "Returns the percentage as string, e.g: '10%'"
@@ -17,26 +16,27 @@
       (.toFixed 1)
       (str "s")))
 
-(defn change-duration
-  "Chagne the duration in state"
+(defn set-duration!
+  "Set the duration in state"
   [state new-value]
-  (swap! state  assoc :duration new-value))
+  (swap! state assoc :duration new-value))
 
-(def FRAME_COUNT 60)
-
-(def MILISECONDS_PER_FRAME (/ 1000 FRAME_COUNT))
+;; 60 Frames per seconds
+(def FPS 60)
+;; Seconds per frame
+(def SECONDS_PER_FRAME (/ 1 FPS))
+(def MILISECONDS_PER_FRAME (/ 1000 FPS))
 
 (defn tick
   "Update the state at each interval and limit elapsed <= duration"
   [state]
-  (swap! state assoc :elapsed (min
-                               (+ (/ 1 FRAME_COUNT)  (:elapsed @state))
-                               (:duration @state))))
+  (swap! state assoc :elapsed (min (+ (:elapsed @state) SECONDS_PER_FRAME)
+                                   (:duration @state))))
 (declare state)
 (declare timer-interval)
 
-(defn timer []
-  (r/with-let [state    (r/atom default-state)
+(defn timer [duration]
+  (r/with-let [state  (r/atom {:elapsed 0 :duration (or duration 10)})
                timer-interval (js/setInterval #(tick state)
                                               MILISECONDS_PER_FRAME)]
     [wrapper {:title "Timer" :class "timer"}
@@ -53,7 +53,7 @@
       [:div.range
        [:input
         {:type "range" :defaultValue 15 :min 0 :max 30
-         :on-change #(change-duration state (-> % .-target .-value js/Number))}]
+         :on-change #(set-duration! state (-> % .-target .-value js/Number))}]
        [:input.field
         {:value (secondify (:duration @state)) :readOnly true :tab-index -1}]]]
      [:input

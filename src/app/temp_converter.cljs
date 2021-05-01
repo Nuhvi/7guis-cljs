@@ -31,30 +31,36 @@
    sci-format))
 
 (defn disable
-  "Set the :err in a target state to 'disabled'"
+  "Return the state with the :err set to 'disabled'"
   [state key]
   (assoc (key @state) :err "disabled"))
 
 (def default-state {:val "" :err ""})
 
-(defn change-handler
-  "Mutate the state atom of the temperature converter according to passed key"
-  [key state e]
-  (let [new-val (-> e .-target .-value)
-        other-key (case key
-                    :cel :fah
-                    :fah :cel)]
-    (if (= new-val "")
+(defn update-state!
+  "Update the state after validating the new-val"
+  [state new-val key opposite-key]
+  (if (= new-val "")
+    (reset! state
+            {key default-state
+             opposite-key (disable state opposite-key)})
+    (if (u/numeric? new-val)
       (reset! state
-              {key default-state
-               other-key (disable state other-key)})
-      (if (u/numeric? new-val)
-        (reset! state
-                {key {:val new-val :err ""}
-                 other-key {:val (convert other-key new-val) :err ""}})
-        (reset! state
-                {key {:val new-val :err "invalid"}
-                 other-key (disable state other-key)})))))
+              {key {:val new-val :err ""}
+               opposite-key {:val (convert opposite-key new-val) :err ""}})
+      (reset! state
+              {key {:val new-val :err "invalid"}
+               opposite-key (disable state opposite-key)}))))
+
+(defn set-celsius! 
+  "Set the celsius temprature and update the rest accordingly"
+  [state new-val]
+  (update-state! state new-val :cel :fah))
+
+(defn set-fahrenheit! 
+  "Set the fahrenheit temprature and update the rest accordingly"
+  [state new-val]
+  (update-state! state new-val :fah :cel))
 
 (defn converter []
   (let [state (r/atom {:cel default-state :fah default-state})]
@@ -64,9 +70,9 @@
         [:p "Celsius:"]
         [:input.field.celsius
          {:value (-> @state :cel :val)
-          :on-change #(change-handler :cel state %)}]]
+          :on-change #(set-celsius! state (-> % .-target .-value))}]]
        [:div.row {:class (-> @state :fah :err str)}
         [:p "Fahrenheit:"]
         [:input.field.fahrenheit
          {:value (-> @state :fah :val)
-          :on-change #(change-handler :fah state %)}]]])))
+          :on-change #(set-fahrenheit! state (-> % .-target .-value))}]]])))

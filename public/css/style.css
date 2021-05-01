@@ -85,14 +85,50 @@ input[type='button'][disabled] {
   color: var(--colors-leva__highlight3);
 }
 
-.row:not(.disabled):hover .field,
-.row:focus-within .field {
+.row:not(.invalid):not(.disabled):hover .field,
+.row:not(.invalid):focus-within .field {
   box-shadow: inset 0 0 0 var(--borderWidths-leva__hover)
     var(--colors-leva__accent3);
 }
 
 .row .field {
   width: 50%;
+}
+
+.row .field.full-width {
+  width: 100%;
+}
+
+select.field.full-width {
+  text-align: left;
+  min-height: calc(var(--sizes-leva__rowHeight) * 3);
+  padding: 0.3em 0;
+}
+
+select.field.full-width option {
+  padding: 0.2em 1em;
+  display: flex;
+  align-items: center;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-button {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+::-webkit-scrollbar-corner {
+  background-color: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--colors-leva__elevation1);
+  border-radius: 10px;
+  position: relative;
 }
 
 .field {
