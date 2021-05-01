@@ -3,7 +3,7 @@
         :modules {:main {:init-fn app.core/main}}
         :output-dir "public/js"
         :target :browser}}
- :dependencies [[reagent "0.8.1"]
+ :dependencies [[reagent "0.9.0"]
                 [com.andrewmcveigh/cljs-time "0.5.2"]]
  :dev-http {3000 "public"}
  :nrepl {:port 3333}
