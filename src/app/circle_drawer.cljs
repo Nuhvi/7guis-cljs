@@ -64,13 +64,14 @@
                     :cx (:x c)
                     :cy (:y c)
                     :r (:r c)}])]
-       [:input
-        {:type "button"
-         :value "Undo"
-         :on-click #(handle-undo! circles undo-list redo-list)
-         :disabled (zero? (count @undo-list))}]
-       [:input
-        {:type "button"
-         :value "Redo"
-         :on-click #(handle-redo! circles redo-list)
-         :disabled (zero? (count @redo-list))}]])))
+       [:div.buttons
+        [:input
+         {:type "button"
+          :value "Undo"
+          :on-click #(handle-undo! circles undo-list redo-list)
+          :disabled (zero? (count @undo-list))}]
+        [:input
+         {:type "button"
+          :value "Redo"
+          :on-click #(handle-redo! circles redo-list)
+          :disabled (zero? (count @redo-list))}]]])))

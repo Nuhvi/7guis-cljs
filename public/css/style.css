@@ -9,10 +9,22 @@ body {
 
 body {
   background-color: #333;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   font-size: 12px;
+}
+
+.app {
+  padding: 2em 1em;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  column-gap: 2em;
+}
+
+@media (min-width: 670px) {
+  .app {
+    /* grid-template-columns: auto auto; */
+    /* column-gap: 2em; */
+  }
 }
 
 .component {
@@ -25,6 +37,8 @@ body {
   font-family: var(--fonts-leva__mono);
 
   margin-bottom: 2em;
+  display: flex;
+  flex-direction: column;
 }
 
 .component * {
@@ -40,8 +54,17 @@ body {
   background-color: var(--colors-leva__elevation2);
   border-radius: var(--radii-leva__lg);
   padding: 1em;
-  display: grid;
+  display: flex;
+  flex-direction: column;
   row-gap: var(--space-leva__md);
+  flex-grow: 1;
+}
+
+.component .content .buttons:last-child {
+  display: inherit;
+  flex-direction: inherit;
+  row-gap: inherit;
+  margin-top: auto;
 }
 
 input[type='button'] {
@@ -217,4 +240,7 @@ select.field.full-width option {
 
 .canvas circle.active {
   fill: var(--colors-leva__highlight1);
+}
+
+.crud {
 }

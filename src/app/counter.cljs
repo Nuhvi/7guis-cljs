@@ -9,5 +9,6 @@
        [:div.row
         [:p "Count:"]
         [:input.field {:value @click-count :readOnly true}]]
-       [:input {:type "button" :value "Increment"
-                :on-click #(swap! click-count inc)}]])))
+       [:div.buttons
+        [:input {:type "button" :value "Increment"
+                 :on-click #(swap! click-count inc)}]]])))

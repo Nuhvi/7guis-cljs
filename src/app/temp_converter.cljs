@@ -69,7 +69,7 @@
 (defn converter []
   (let [state (r/atom {:cel default-state :fah default-state})]
     (fn []
-      [wrapper {:title "Temperature Converter" :class "converter"}
+      [wrapper {:title "Temperature Converter"}
        [:div.row {:class (-> @state :cel :err str)}
         [:p "Celsius:"]
         [:input.field.celsius

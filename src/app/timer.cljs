@@ -56,8 +56,9 @@
          :on-change #(set-duration! state (js/Number (.. % -target -value)))}]
        [:input.field
         {:value (secondify (:duration @state)) :readOnly true :tab-index -1}]]]
-     [:input
-      {:type "button"
-       :on-click #(swap! state assoc :elapsed 0)
-       :value "Reset Timer"}]]
+       [:div.buttons
+        [:input
+         {:type "button"
+          :on-click #(swap! state assoc :elapsed 0)
+          :value "Reset Timer"}]]]
     (finally (js/clearInterval timer-interval))))

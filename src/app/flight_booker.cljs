@@ -69,7 +69,7 @@
 (defn booker []
   (let [state (r/atom default-state)]
     (fn []
-      [wrapper {:title "Flight Booker" :class "booker"}
+      [wrapper {:title "Flight Booker"}
        [:div.row
         [:p "Type: "]
         [:select.field.type
@@ -88,8 +88,9 @@
         [:input.field
          {:value (:return-date @state)
           :on-change #(set-return! state (.. % -target -value))}]]
-       [:input
-        {:type "button"
-         :on-click #(book! @state)
-         :disabled (can-not-book? @state)
-         :value "Book"}]])))
+       [:div.buttons
+        [:input
+         {:type "button"
+          :on-click #(book! @state)
+          :disabled (can-not-book? @state)
+          :value "Book"}]]])))

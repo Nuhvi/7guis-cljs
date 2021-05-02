@@ -109,19 +109,20 @@ initial-data
         [:p "Surname"]
         [:input.field
          {:on-change #(swap! state assoc :surname (.. % -target -value))}]]
-       [:input
-        {:type "button"
-         :value "Create"
-         :disabled (invalid-input? @state)
-         :on-click #(handle-create! state)}]
-       [:input
-        {:type "button"
-         :value "Update"
-         :disabled (or (nothing-selected? @state)
-                       (invalid-input? @state))
-         :on-click #(db-update! (:selected @state) (:name @state) (:surname @state))}]
-       [:input
-        {:type "button"
-         :value "Delete"
-         :disabled (nothing-selected? @state)
-         :on-click #(handle-delete! state)}]])))
+       [:div.buttons
+        [:input
+         {:type "button"
+          :value "Create"
+          :disabled (invalid-input? @state)
+          :on-click #(handle-create! state)}]
+        [:input
+         {:type "button"
+          :value "Update"
+          :disabled (or (nothing-selected? @state)
+                        (invalid-input? @state))
+          :on-click #(db-update! (:selected @state) (:name @state) (:surname @state))}]
+        [:input
+         {:type "button"
+          :value "Delete"
+          :disabled (nothing-selected? @state)
+          :on-click #(handle-delete! state)}]]])))
