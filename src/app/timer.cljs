@@ -22,10 +22,10 @@
   (swap! state assoc :duration new-value))
 
 ;; 60 Frames per seconds
-(def FPS 60)
+(defonce FPS 60)
 ;; Seconds per frame
-(def SECONDS_PER_FRAME (/ 1 FPS))
-(def MILISECONDS_PER_FRAME (/ 1000 FPS))
+(defonce SECONDS_PER_FRAME (/ 1 FPS))
+(defonce MILISECONDS_PER_FRAME (/ 1000 FPS))
 
 (defn tick
   "Update the state at each interval and limit elapsed <= duration"

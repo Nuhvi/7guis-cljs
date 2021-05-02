@@ -34,7 +34,7 @@
   [state key]
   (assoc (key @state) :err "disabled"))
 
-(def default-state {:val "" :err ""})
+(defonce default-state {:val "" :err ""})
 
 (defn valid-number-string?
   "Check that input string is a valid Number"

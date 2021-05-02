@@ -4,8 +4,8 @@
             [cljs-time.core :as t]
             [cljs-time.format :as tf]))
 
-(def date-format "dd/MM/yyyy")
-(def initial-date (tf/unparse {:format-str  date-format} (t/now)))
+(defonce date-format "dd/MM/yyyy")
+(defonce initial-date (tf/unparse {:format-str  date-format} (t/now)))
 
 (defn parse-date
   "Calculate Date from string with format dd/MM/yyyy"
@@ -58,7 +58,7 @@
                            (:departure-date state) " to "
                            (:return-date state)))))
 
-(def default-state
+(defonce default-state
   {:type "one-way"
    :departure-date initial-date
    :invalid-departure? false

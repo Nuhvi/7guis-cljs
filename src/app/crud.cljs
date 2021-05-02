@@ -1,6 +1,5 @@
 (ns app.crud
   (:require [reagent.core :as r]
-            [goog.dom :as gdom]
             [app.wrapper :refer [wrapper]]))
 
 ;; Simulate backend database with an atom
@@ -8,7 +7,7 @@
 (defonce db (r/atom []))
 
 (defn db-create!
-  "Create an entry in the database"
+  "Create a new entry, and return the new state of db"
   [name surname]
   (swap! db conj 
          {:id (str (random-uuid))
@@ -28,7 +27,7 @@
   (first (keep-indexed #(if (pred %2) %1 nil) coll)))
 
 (defn db-update!
-  "Create an entry in the database"
+  "Update a given entry by id, and return the new state of db"
   [id name surname]
   (swap! db assoc 
          (find-index #(= (:id %) id) @db)
@@ -38,7 +37,7 @@
           :fullname (str surname ", " name)}))
 
 (defn db-delete!
-  "Delete an entry in the database"
+  "Delete a given entry by id, and return the new sate of db"
   [id]
   (swap! db (fn [coll] (filterv #(not= (:id %) id) coll))))
 
@@ -75,16 +74,18 @@
 (defn handle-create!
   "Update the database and component state on-click Create"
   [state]
-  (do (db-create! (:name @state) (:surname @state))
-      ;;Autofocus on the newly created entry
-      (swap! state assoc :selected (:id (last @db)))))
+  (->> (db-create! (:name @state) (:surname @state))
+       ;;Autofocus on the newly created entry
+       last
+       :id
+       (swap! state assoc :selected)))
 
 (defn handle-delete!
   "Update the database and component state on-click Delete"
   [state]
-  (do (db-delete! (:selected @state))
-      ;;Update the :selected id to the id of first entry
-      (swap! state assoc :selected (:id (first @db)))))
+  ((db-delete! (:selected @state))
+   ;;Update the :selected id to the id of first entry
+   (swap! state assoc :selected (:id (first @db)))))
 
 (defn crud []
   (let [state (r/atom {:name "" :surname "" :prefix "" :selected ""})]
