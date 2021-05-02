@@ -58,13 +58,13 @@
 (defn invalid-input?
   "Check if the name or surname are empty"
   [state]
-  (or (= 0 (count (:name state)))
-      (= 0 (count (:surname state)))))
+  (or (zero? (count (:name state)))
+      (zero? (count (:surname state)))))
 
 (defn nothing-selected?
   "Checks if the state has an active id"
   [state]
-  (= 0 (count (:selected state))))
+  (zero? (count (:selected state))))
 
 (defn filter-list
   "Filter a list of entries using filter prefix"
