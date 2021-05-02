@@ -20,6 +20,7 @@
   (do (db-create! "Hans" "Emil")
       (db-create! "Max" "Mustermann")
       (db-create! "Roman" "Tisch")))
+initial-data
 
 (defn find-index
   "Find the first index where the predicate returns true"
