@@ -5,7 +5,8 @@
             [app.temp-converter :refer [converter]]
             [app.flight-booker :refer [booker]]
             [app.timer :refer [timer]]
-            [app.crud :refer [crud]]))
+            [app.crud :refer [crud]]
+            [app.circle-drawer :refer [drawer]]))
 
 (defn app []
   [:main.app
@@ -13,7 +14,8 @@
    [converter]
    [booker]
    [timer 15]
-   [crud {1 {:fst "Hans" :lst "Emil"}}]])
+   [crud {1 {:fst "Hans" :lst "Emil"}}]
+   [drawer]])
 
 (defn ^:dev/after-load render
   "Render the toplevel component for this app."

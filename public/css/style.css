@@ -203,3 +203,18 @@ select.field.full-width option {
 .timer .row {
   align-items: center;
 }
+
+.canvas {
+  background-color: var(--colors-leva__elevation1);
+  height: calc(var(--sizes-leva__rootWidth) / 1.5);
+  width: 100%;
+}
+
+.canvas circle {
+  stroke: var(--colors-leva__highlight2);
+  fill: #0000;
+}
+
+.canvas circle.active {
+  fill: var(--colors-leva__highlight1);
+}
