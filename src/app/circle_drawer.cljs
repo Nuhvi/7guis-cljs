@@ -4,8 +4,8 @@
 
 (defonce RADIUS 15)
 
-(defn getCoordinates
-  "Return x and y coordinates of a click event"
+(defn evt-center
+  "Return x and y coordinates of a DOM event"
   [e]
   (let [target (.-currentTarget e)
         rect (.getBoundingClientRect target)
@@ -13,53 +13,50 @@
         y (- (.-clientY e) (-> rect .-top int))]
     (list x y)))
 
-(defn draw-circle!
-  "Draw a new circle on canvas"
-  [coordinates radius circles]
-  (swap! circles conj {:id (random-uuid)
-                       :x (first coordinates)
-                       :y (last coordinates)
-                       :r radius}))
+(defn circle-geo
+  "Retrun an object representing a circle"
+  ([{:keys [center radius id]}]
+   {:id (or id (random-uuid))
+    :x (first center)
+    :y (last center)
+    :r (or radius RADIUS)}))
 
-(defn handle-canvas-click!
-  "Decide whether to add new circle, or edit existing one"
-  [e circles redo-list]
-  (draw-circle! (getCoordinates e) RADIUS circles)
-  (reset! redo-list nil))
+(defn add-circle!
+  "Add a circle to circles, reset the redo-stack,
+   and store perivous circles in undo-stack"
+  [e state]
+  (reset! state {:redo-stack nil
+                 :undo-stack (conj (:undo-stack @state) (:circles @state))
+                 :circles (conj (:circles @state)
+                                (circle-geo {:center (evt-center e)}))}))
 
-(defn keep-undo-list
-  "Keep undo-list of changes to a given state"
-  [state undo-list]
-  (add-watch state :watcher
-             (fn [_ _ old-state _]
-               (swap! undo-list conj old-state))))
+(defn undo!
+  "Revert the state to the last saved change in undo-stack"
+  [state]
+  (reset! state {:circles (first (:undo-stack @state))
+                 :redo-stack (conj (:redo-stack @state)
+                                   (:circles @state))
+                 :undo-stack (rest (:undo-stack @state))}))
 
-(defn handle-undo!
-  "Revert the state to the last saved state in undo-list"
-  [state undo-list redo-list]
-  (let [undos @undo-list]
-    (when-let [previous-state (first undos)]
-      (swap! redo-list conj @state)
-      (reset! state previous-state)
-      (reset! undo-list (rest undos)))))
-
-(defn handle-redo!
-  "Revert the state to the last saved state in redo-list"
-  [state redo-list]
-  (when-let [previous-state (first @redo-list)]
-    (reset! state previous-state)
-    (reset! redo-list (rest @redo-list))))
+(defn redo!
+  "Revert the state to the last saved change in redo-stack"
+  [state]
+  (reset! state {:circles (first (:redo-stack @state))
+                 :undo-stack (conj (:undo-stack @state)
+                                   (:circles @state))
+                 :redo-stack (rest (:redo-stack @state))}))
 
 (defn drawer []
-  (let [circles (r/atom '())
-        undo-list (r/atom nil)
-        redo-list (r/atom nil)]
-    (keep-undo-list circles undo-list)
+  (let [state (r/atom {:circles nil
+                       :undo-stack nil
+                       :redo-stack nil})]
+    (add-watch state :watcher
+               (fn [_ _ old new] (js/console.log "old state " (clj->js old) ", new state " (clj->js new))))
     (fn []
       [wrapper {:title "Circle drawer"}
        [:svg.canvas
-        {:on-click #(handle-canvas-click! % circles redo-list)}
-        (for [c @circles]
+        {:on-click #(add-circle! % state)}
+        (for [c (:circles @state)]
           [:circle {:key (:id c)
                     :cx (:x c)
                     :cy (:y c)
@@ -68,10 +65,10 @@
         [:input
          {:type "button"
           :value "Undo"
-          :on-click #(handle-undo! circles undo-list redo-list)
-          :disabled (zero? (count @undo-list))}]
+          :on-click #(undo! state)
+          :disabled (zero? (count (:undo-stack @state)))}]
         [:input
          {:type "button"
           :value "Redo"
-          :on-click #(handle-redo! circles redo-list)
-          :disabled (zero? (count @redo-list))}]]])))
+          :on-click #(redo! state)
+          :disabled (zero? (count (:redo-stack @state)))}]]])))
