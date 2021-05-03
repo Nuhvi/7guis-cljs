@@ -77,16 +77,17 @@
           :on-change #(set-type! state (.. % -target -value))}
          [:option {:value "one-way"} "One-way"]
          [:option {:value "round"} "Round trip"]]]
-       [:div.row {:class (if (:invalid-departure? @state) "invalid" "")}
+       [:div.row {:class (when (:invalid-departure? @state) "invalid")}
         [:p "Departure date:"]
         [:input.field
          {:value (:departure-date @state)
           :on-change #(set-departure! state (.. % -target -value))}]]
-       [:div.row {:class [(if (:return-disabled? @state) "disabled" "")
-                          (if (:invalid-return? @state) "invalid" "")]}
+       [:div.row {:class [(when (:return-disabled? @state) "disabled")
+                          (when (:invalid-return? @state) "invalid")]}
         [:p "Retrun date:"]
         [:input.field
          {:value (:return-date @state)
+          :disabled (when (:return-disabled? @state) "disabled")
           :on-change #(set-return! state (.. % -target -value))}]]
        [:div.buttons
         [:input

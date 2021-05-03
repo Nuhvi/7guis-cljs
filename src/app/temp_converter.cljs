@@ -70,12 +70,12 @@
   (let [state (r/atom {:cel default-state :fah default-state})]
     (fn []
       [wrapper {:title "Temperature Converter"}
-       [:div.row {:class (-> @state :cel :err str)}
+       [:div.row {:class (-> @state :cel :err)}
         [:p "Celsius:"]
         [:input.field.celsius
          {:value (-> @state :cel :val)
           :on-change #(set-celsius! state (.. % -target -value))}]]
-       [:div.row {:class (-> @state :fah :err str)}
+       [:div.row {:class (-> @state :fah :err)}
         [:p "Fahrenheit:"]
         [:input.field.fahrenheit
          {:value (-> @state :fah :val)

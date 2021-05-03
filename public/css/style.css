@@ -181,7 +181,6 @@ select.field.full-width option {
 
 .disabled {
   color: var(--colors-leva__highlight1);
-  pointer-events: none;
 }
 
 .row.disabled .field,
