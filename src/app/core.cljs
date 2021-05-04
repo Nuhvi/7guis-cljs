@@ -35,7 +35,7 @@
     [converter]
     [booker]
     [timer 15]
-    [crud {1 {:fst "Hans" :lst "Emil"}}]
+    [crud]
     [drawer]]])
 
 (defn ^:dev/after-load render

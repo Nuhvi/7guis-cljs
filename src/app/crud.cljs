@@ -2,24 +2,30 @@
   (:require [reagent.core :as r]
             [app.wrapper :refer [wrapper]]))
 
-;; Simulate backend database with an atom
-;; outside of the component.
-(defonce db (r/atom []))
+;; ============================================
+;; Global state to simulate an external backend
+;; ============================================
 
-(defn db-create!
-  "Create a new entry, and return the new state of db"
+(defonce users (r/atom []))
+
+(defn generate-user
+  "Generate a user using name, surname and id,
+   or generate random uuid if id is not provided"
+  [{:keys [name surname id]}]
+  {:id (or id (str (random-uuid)))
+   :name name
+   :surname surname})
+
+(defn create-user!
+  "Create a new user, and return the new state of users"
   [name surname]
-  (swap! db conj 
-         {:id (str (random-uuid))
-          :name name
-          :surname surname
-          :fullname (str surname ", " name)}))
+  (swap! users conj (generate-user {:name name :surname surname})))
 
 ;; Generate initial data
 (defonce initial-data
-  (do (db-create! "Hans" "Emil")
-      (db-create! "Max" "Mustermann")
-      (db-create! "Roman" "Tisch")))
+  (do (create-user! "Hans" "Emil")
+      (create-user! "Max" "Mustermann")
+      (create-user! "Roman" "Tisch")))
 initial-data
 
 (defn find-index
@@ -27,35 +33,22 @@ initial-data
   [pred coll]
   (first (keep-indexed #(if (pred %2) %1 nil) coll)))
 
-(defn db-update!
-  "Update a given entry by id, and return the new state of db"
+(defn update-user!
+  "Update a given user by id, and return the new state of db"
   [id name surname]
-  (swap! db assoc 
-         (find-index #(= (:id %) id) @db)
-         {:id id
-          :name name
-          :surname surname
-          :fullname (str surname ", " name)}))
+  (swap! users assoc
+         (find-index #(= (:id %) id) @users)
+         (generate-user {:id id :name name :surname surname})))
 
-(defn db-delete!
-  "Delete a given entry by id, and return the new sate of db"
+(defn delete-user!
+  "Delete a given user by id, and return the new sate of db"
   [id]
-  (swap! db (fn [coll] (filterv #(not= (:id %) id) coll))))
+  (swap! users (fn [coll] (filterv #(not= (:id %) id) coll))))
 
-(defn listbox
-  "Renders the listbox using the filtered data in db"
-  [{:keys [list value on-change]}]
-  [:div.row [:select.field.full-width
-             {:value value
-              :size 3
-              :on-change on-change}
-             (for [entry list]
-               [:option
-                {:value (:id entry)
-                 :key (:id entry)}
-                (:fullname entry)])]])
+;; ===================
+;; Component functions
+;; ===================
 
-;; State helper functions
 (defn invalid-input?
   "Check if the name or surname are empty"
   [state]
@@ -67,38 +60,69 @@ initial-data
   [state]
   (zero? (count (:selected state))))
 
+(defn fullname
+  "Generate fullname from user's name and surname"
+  [user]
+  (str (:surname user) ", " (:name user)))
+
 (defn filter-list
-  "Filter a list of entries using filter prefix"
+  "Filter a list of users using filter prefix"
   [list ^string prefix]
-  (filter #(re-find (re-pattern prefix) (:fullname %)) list))
+  (filter #(re-find (re-pattern (str "(?i)" prefix)) (fullname %)) list))
 
 (defn handle-create!
-  "Update the database and component state on-click Create"
+  "Create new user and switch focus to it"
   [state]
-  (->> (db-create! (:name @state) (:surname @state))
-       ;;Autofocus on the newly created entry
-       last
-       :id
-       (swap! state assoc :selected)))
+  (let [old-state @state
+        name (:name old-state)
+        surname (:surname old-state)]
+    (->> (create-user! name surname)
+         last
+         :id
+         (swap! state assoc :selected))))
+
+(defn handle-update!
+  "Update the selected user with name and surname"
+  [state]
+  (let [old-state @state
+        id (:selected old-state)
+        name (:name old-state)
+        surname (:surname old-state)]
+    (update-user! id name surname)))
 
 (defn handle-delete!
-  "Update the database and component state on-click Delete"
+  ;; TODO make it switch to the closest users in the list instead
+  "Delete an user and switch focus to the first user"
   [state]
-  ((db-delete! (:selected @state))
-   ;;Update the :selected id to the id of first entry
-   (swap! state assoc :selected (:id (first @db)))))
+  (let [new-users (delete-user! (:selected @state))]
+    (swap! state assoc :selected (:id (first new-users)))))
+
+
+(defn listbox
+  "Renders the listbox using a given list of users"
+  [{:keys [list value on-change]}]
+  [:div.row [:select.field.full-width
+             {:value value
+              :size 3
+              :on-change on-change}
+             (for [user list]
+               [:option
+                {:value (:id user) :key (:id user)}
+                (fullname user)])]])
 
 (defn crud []
-  (let [state (r/atom {:name "" :surname "" :prefix "" :selected ""})]
+  (let [state (r/atom {:name ""
+                       :surname ""
+                       :prefix ""
+                       :selected (:id (first @users))})]
     (fn []
       [wrapper {:title "CRUD"}
-       [:div @state]
        [:div.row
         [:p "Filter prefix"]
         [:input.field
          {:on-change #(swap! state assoc :prefix (.. % -target -value))}]]
        [listbox
-        {:list (filter-list @db (:prefix @state))
+        {:list (filter-list @users (:prefix @state))
          :value (:selected @state)
          :on-change #(swap! state assoc :selected (.. % -target -value))}]
        [:div.row
@@ -113,16 +137,16 @@ initial-data
         [:input
          {:type "button"
           :value "Create"
-          :disabled (invalid-input? @state)
+          :aria-disabled (invalid-input? @state)
           :on-click #(handle-create! state)}]
         [:input
          {:type "button"
           :value "Update"
-          :disabled (or (nothing-selected? @state)
-                        (invalid-input? @state))
-          :on-click #(db-update! (:selected @state) (:name @state) (:surname @state))}]
+          :aria-disabled (or (nothing-selected? @state)
+                             (invalid-input? @state))
+          :on-click #(handle-update! state)}]
         [:input
          {:type "button"
           :value "Delete"
-          :disabled (nothing-selected? @state)
+          :aria-disabled (nothing-selected? @state)
           :on-click #(handle-delete! state)}]]])))
