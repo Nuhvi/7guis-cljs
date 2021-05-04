@@ -87,11 +87,11 @@
         [:p "Retrun date:"]
         [:input.field
          {:value (:return-date @state)
-          :disabled (when (:return-disabled? @state) "disabled")
+          :aria-disabled (when (:return-disabled? @state) "disabled")
           :on-change #(set-return! state (.. % -target -value))}]]
        [:div.buttons
         [:input
          {:type "button"
           :on-click #(book! @state)
-          :disabled (can-not-book? @state)
+          :aria-disabled (can-not-book? @state)
           :value "Book"}]]])))

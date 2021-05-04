@@ -18,13 +18,8 @@ body {
   flex-wrap: wrap;
   justify-content: center;
   column-gap: 2em;
-}
-
-@media (min-width: 670px) {
-  .app {
-    /* grid-template-columns: auto auto; */
-    /* column-gap: 2em; */
-  }
+  max-width: 600px;
+  margin: auto;
 }
 
 .component {
@@ -88,7 +83,7 @@ input[type='button']:focus {
   box-shadow: 0 0 0 var(--borderWidths-leva__focus) var(--colors-leva__accent3);
 }
 
-input[type='button'][disabled] {
+input[type='button'][aria-disabled='true'] {
   opacity: 0.5;
   pointer-events: none;
 }
