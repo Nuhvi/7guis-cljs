@@ -12,14 +12,44 @@ body {
   font-size: 12px;
 }
 
-.app {
-  padding: 2em 1em;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  column-gap: 2em;
+main {
   max-width: 600px;
   margin: auto;
+  padding: 1em 2em;
+}
+
+header {
+  text-align: center;
+  color: var(--colors-leva__highlight2);
+  font-family: var(--fonts-leva__mono);
+  max-width: 300px;
+  margin: auto;
+}
+
+header h1 {
+  font-weight: 400;
+  font-size: 20px;
+}
+
+a[href] {
+  color: var(--colors-leva__accent1);
+}
+
+.app {
+  padding: 2em 0;
+  display: grid;
+  justify-content: center;
+  column-gap: 2em;
+}
+
+@media (min-width: 690px) {
+  header {
+    max-width: 100%;
+  }
+
+  .app {
+    grid-template-columns: auto auto;
+  }
 }
 
 .component {
@@ -129,21 +159,21 @@ select.field.full-width option {
   align-items: center;
 }
 
-::-webkit-scrollbar {
+.app ::-webkit-scrollbar {
   width: 6px;
 }
 
-::-webkit-scrollbar-button {
+.app ::-webkit-scrollbar-button {
   width: 0;
   height: 0;
   display: none;
 }
 
-::-webkit-scrollbar-corner {
+.app ::-webkit-scrollbar-corner {
   background-color: transparent;
 }
 
-::-webkit-scrollbar-thumb {
+.app ::-webkit-scrollbar-thumb {
   background: var(--colors-leva__elevation1);
   border-radius: 10px;
   position: relative;

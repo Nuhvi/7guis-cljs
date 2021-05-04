@@ -13,8 +13,7 @@
   --radii-leva__lg: 10px;
   --space-leva__md: 10px;
   --space-leva__rowGap: 7px;
-  --fonts-leva__mono: ui-monospace, SFMono-Regular, Menlo, 'Roboto Mono',
-    monospace;
+  --fonts-leva__mono: 'Roboto Mono', monospace;
   --sizes-leva__rootWidth: 280px;
   --sizes-leva__rowHeight: 24px;
   --shadows-leva__level1: 0 0 9px 0 #00000088;

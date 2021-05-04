@@ -9,13 +9,34 @@
             [app.circle-drawer :refer [drawer]]))
 
 (defn app []
-  [:main.app
-   [counter 0]
-   [converter]
-   [booker]
-   [timer 15]
-   [crud {1 {:fst "Hans" :lst "Emil"}}]
-   [drawer]])
+  [:main
+   [:header
+    [:h1 "7GUIs"]
+    [:p
+     "This is a live version of an implementation ("
+     [:a
+      {:href "https://github.com/Nazeh/7guis-cljs"
+       :target "_blank"}
+      "source"]
+     ") of "
+     [:a
+      {:href "https://eugenkiss.github.io/7guis/"}
+      "7GUIs"]
+      " with "
+     [:a
+      {:href "https://reagent-project.github.io/"}
+      "Reagent"]
+     " and "
+     [:a
+      {:href "https://clojurescript.org/"}
+      "CLJS"]]]
+   [:section.app
+    [counter 0]
+    [converter]
+    [booker]
+    [timer 15]
+    [crud {1 {:fst "Hans" :lst "Emil"}}]
+    [drawer]]])
 
 (defn ^:dev/after-load render
   "Render the toplevel component for this app."
