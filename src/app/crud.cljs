@@ -163,7 +163,6 @@
 (defn crud [users]
   (let [state (r/atom (initial-state (or users DEMO_DATA)))]
     (fn []
-      (js/console.log (clj->js @state))
       [wrapper {:title "CRUD"}
        [:div.row
         [:p "Filter prefix"]
