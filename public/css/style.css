@@ -254,17 +254,42 @@ select.field.full-width option {
 .canvas {
   background-color: var(--colors-leva__elevation1);
   height: calc(var(--sizes-leva__rootWidth) / 1.5);
+  position: relative;
+}
+
+.canvas svg {
   width: 100%;
+  height: 100%;
+  cursor: pointer;
 }
 
 .canvas circle {
   stroke: var(--colors-leva__highlight2);
   fill: #0000;
+  z-index: 99;
 }
 
 .canvas circle.active {
+  position: relative;
   fill: var(--colors-leva__highlight1);
 }
 
-.crud {
+.circle-drawer .popup {
+  display: none;
+  position: absolute;
+  z-index: 999999;
+  width: fit-content;
+  border-radius: var(--radii-leva__sm);
+  padding: 0.5em;
+  background-color: var(--colors-leva__elevation2);
+  box-shadow: var(--shadows-leva__level1);
+  text-align: center;
+}
+
+.popup p {
+  margin-bottom: 0.3em;
+}
+
+.circle-drawer .popup.open {
+  display: block;
 }
