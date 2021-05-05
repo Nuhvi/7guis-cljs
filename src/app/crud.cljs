@@ -147,14 +147,13 @@
 (defn listbox
   "Renders the listbox using a given list of users"
   [{:keys [list value on-change]}]
-  [:div.row [:select.field.full-width
-             {:value (or value "")
-              :size 3
-              :on-change on-change}
-             (for [user list]
-               [:option
-                {:value (:id user) :key (:id user)}
-                (fullname user)])]])
+  [:div.row
+   [:select.field.full-width {:size 3
+                              :value (or value "") 
+                              :on-change on-change}
+    (for [user list]
+      [:option {:value (:id user) :key (:id user)}
+       (fullname user)])]])
             
 (defonce DEMO_DATA [(generate-user {:name "Hans" :surname "Emil"})
                     (generate-user {:name "Max" :surname "Mustermann"})
@@ -166,33 +165,26 @@
       [wrapper {:title "CRUD"}
        [:div.row
         [:p "Filter prefix"]
-        [:input.field
-         {:on-change #(set-target-value state :prefix %)}]]
-       [listbox
-        {:list (filter-users (:users @state) (:prefix @state))
-         :value (:selected @state)
-         :on-change #(set-target-value state :selected %)}]
+        [:input.field {:on-change #(set-target-value state :prefix %)}]]
+       [listbox {:value (:selected @state)
+                 :list (filter-users (:users @state) (:prefix @state))
+                 :on-change #(set-target-value state :selected %)}]
        [:div.row
         [:p "Name"]
-        [:input.field
-         {:on-change #(set-target-value state :name %)}]]
+        [:input.field {:on-change #(set-target-value state :name %)}]]
        [:div.row
         [:p "Surname"]
-        [:input.field
-         {:on-change #(set-target-value state :surname %)}]]
+        [:input.field {:on-change #(set-target-value state :surname %)}]]
        [:div.buttons
-        [:input
-         {:type "button"
-          :value "Create"
-          :aria-disabled (not (can-create? @state))
-          :on-click #(handle-create! state)}]
-        [:input
-         {:type "button"
-          :value "Update"
-          :aria-disabled (not (can-update? @state))
-          :on-click #(handle-update! state)}]
-        [:input
-         {:type "button"
-          :value "Delete"
-          :aria-disabled (not (can-delete? @state))
-          :on-click #(handle-delete! state)}]]])))
+        [:input {:type "button"
+                 :value "Create"
+                 :aria-disabled (not (can-create? @state))
+                 :on-click #(handle-create! state)}]
+        [:input {:type "button"
+                 :value "Update"
+                 :aria-disabled (not (can-update? @state))
+                 :on-click #(handle-update! state)}]
+        [:input {:type "button"
+                 :value "Delete"
+                 :aria-disabled (not (can-delete? @state))
+                 :on-click #(handle-delete! state)}]]])))

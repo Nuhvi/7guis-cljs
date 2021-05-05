@@ -18,8 +18,8 @@
 
 (defn set-duration!
   "Set the duration in state"
-  [state new-value]
-  (swap! state assoc :duration new-value))
+  [state e]
+  (swap! state assoc :duration (js/Number (.. e -target -value))))
 
 ;; 60 Frames per seconds
 (defonce FPS 60)
@@ -44,21 +44,19 @@
       [:p "Elapsed time: "]
       [:div.meter
        [:div.meter-slider-container
-        [:div.meter-slider
+        [:div.meter-slider 
          {:style {:width (percentage (:elapsed @state) (:duration @state))}}]]
-       [:input.field.meter-value
-        {:value (secondify (:elapsed @state)) :readOnly true :tab-index -1}]]]
+       [:input.field.meter-value {:value (secondify (:elapsed @state))
+                                  :readOnly true :tab-index -1}]]]
      [:div.row
       [:p "Duration"]
       [:div.range
-       [:input
-        {:type "range" :defaultValue 15 :min 0 :max 30
-         :on-change #(set-duration! state (js/Number (.. % -target -value)))}]
-       [:input.field
-        {:value (secondify (:duration @state)) :readOnly true :tab-index -1}]]]
+       [:input {:type "range" :defaultValue 15 :min 0 :max 30
+                :on-change #(set-duration! state %)}]
+       [:input.field {:value (secondify (:duration @state))
+                      :readOnly true :tab-index -1}]]]
        [:div.buttons
-        [:input
-         {:type "button"
-          :on-click #(swap! state assoc :elapsed 0)
-          :value "Reset Timer"}]]]
+        [:input {:type "button"
+                 :on-click #(swap! state assoc :elapsed 0)
+                 :value "Reset Timer"}]]]
     (finally (js/clearInterval timer-interval))))

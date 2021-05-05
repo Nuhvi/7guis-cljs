@@ -58,13 +58,12 @@
                            (:departure-date state) " to "
                            (:return-date state)))))
 
-(defonce default-state
-  {:type "one-way"
-   :departure-date initial-date
-   :invalid-departure? false
-   :return-date initial-date
-   :invalid-return? false
-   :return-disabled? true})
+(defonce default-state  {:type "one-way"
+                         :departure-date initial-date
+                         :invalid-departure? false
+                         :return-date initial-date
+                         :invalid-return? false
+                         :return-disabled? true})
 
 (defn booker []
   (let [state (r/atom default-state)]
@@ -72,26 +71,22 @@
       [wrapper {:title "Flight Booker"}
        [:div.row
         [:p "Type: "]
-        [:select.field.type
-         {:value (:type @state)
-          :on-change #(set-type! state (.. % -target -value))}
+        [:select.field.type {:value (:type @state)
+                             :on-change #(set-type! state (.. % -target -value))}
          [:option {:value "one-way"} "One-way"]
          [:option {:value "round"} "Round trip"]]]
        [:div.row {:class (when (:invalid-departure? @state) "invalid")}
         [:p "Departure date:"]
-        [:input.field
-         {:value (:departure-date @state)
-          :on-change #(set-departure! state (.. % -target -value))}]]
+        [:input.field {:value (:departure-date @state)
+                       :on-change #(set-departure! state (.. % -target -value))}]]
        [:div.row {:class [(when (:return-disabled? @state) "disabled")
                           (when (:invalid-return? @state) "invalid")]}
         [:p "Retrun date:"]
-        [:input.field
-         {:value (:return-date @state)
-          :aria-disabled (when (:return-disabled? @state) "disabled")
-          :on-change #(set-return! state (.. % -target -value))}]]
+        [:input.field {:value (:return-date @state)
+                       :aria-disabled (when (:return-disabled? @state) "disabled")
+                       :on-change #(set-return! state (.. % -target -value))}]]
        [:div.buttons
-        [:input
-         {:type "button"
-          :on-click #(book! @state)
-          :aria-disabled (can-not-book? @state)
-          :value "Book"}]]])))
+        [:input {:type "button"
+                 :on-click #(book! @state)
+                 :aria-disabled (can-not-book? @state)
+                 :value "Book"}]]])))

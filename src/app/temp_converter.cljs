@@ -49,22 +49,20 @@
             {key default-state
              opposite-key (disable state opposite-key)})
     (if (valid-number-string? new-val)
-      (reset! state
-              {key {:val new-val :err ""}
-               opposite-key {:val (convert opposite-key new-val) :err ""}})
-      (reset! state
-              {key {:val new-val :err "invalid"}
-               opposite-key (disable state opposite-key)}))))
+      (reset! state {key {:val new-val :err ""}
+                     opposite-key {:val (convert opposite-key new-val) :err ""}})
+      (reset! state {key {:val new-val :err "invalid"}
+                     opposite-key (disable state opposite-key)}))))
 
 (defn set-celsius! 
   "Set the celsius temprature and update the rest accordingly"
-  [state new-val]
-  (update-state! state new-val :cel :fah))
+  [state e]
+  (update-state! state (.. e -target -value) :cel :fah))
 
 (defn set-fahrenheit! 
   "Set the fahrenheit temprature and update the rest accordingly"
-  [state new-val]
-  (update-state! state new-val :fah :cel))
+  [state e]
+  (update-state! state (.. e -target -value) :fah :cel))
 
 (defn converter []
   (let [state (r/atom {:cel default-state :fah default-state})]
@@ -72,11 +70,9 @@
       [wrapper {:title "Temperature Converter"}
        [:div.row {:class (-> @state :cel :err)}
         [:p "Celsius:"]
-        [:input.field.celsius
-         {:value (-> @state :cel :val)
-          :on-change #(set-celsius! state (.. % -target -value))}]]
+        [:input.field.celsius {:value (-> @state :cel :val)
+                               :on-change #(set-celsius! state %)}]]
        [:div.row {:class (-> @state :fah :err)}
         [:p "Fahrenheit:"]
-        [:input.field.fahrenheit
-         {:value (-> @state :fah :val)
-          :on-change #(set-fahrenheit! state (.. % -target -value))}]]])))
+        [:input.field.fahrenheit {:value (-> @state :fah :val)
+                                  :on-change #(set-fahrenheit! state %)}]]])))
