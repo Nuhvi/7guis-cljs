@@ -123,7 +123,7 @@
         id (:selected s)
         name (:name s)
         surname (:surname s)
-        position (find-pos (:selected s) (:user s))]
+        position (find-pos (:selected s) (:users s))]
     (when (can-update? s)
       (swap! state assoc-in
              [:users position]
