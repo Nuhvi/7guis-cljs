@@ -1,5 +1,6 @@
 (ns app.circle-drawer
   (:require [reagent.core :as r]
+            [app.utils :refer [find-pos]]
             [app.wrapper :refer [wrapper]]))
 
 (defonce RADIUS 15)
@@ -21,6 +22,10 @@
     :y (last center)
     :r (or radius RADIUS)}))
 
+;; ==============
+;; State modifers
+;; ==============
+
 (defn add-circle!
   "Add a circle to circles, reset the redo-stack,
    and store perivous circles in undo-stack,
@@ -40,6 +45,8 @@
   [state]
   (let [s @state]
     (swap! state assoc
+           :popup-open false
+           :active-circle nil
            :circles (first (:undo-stack s))
            :undo-stack (rest (:undo-stack s))
            :redo-stack (conj (:redo-stack s) (:circles s)))))
@@ -49,6 +56,8 @@
   [state]
   (let [s @state]
   (swap! state assoc
+         :popup-open false
+         :active-circle nil
          :circles (first (:redo-stack s))
          :redo-stack (rest (:redo-stack s))
          :undo-stack (conj (:undo-stack s) (:circles s)))))
@@ -69,34 +78,38 @@
   (js/console.log (clj->js (.-target e))
   ))
 
-(defn find-pos
-  "Find the position of a user in a vector by their uuid"
-  [id coll]
-  (first (keep-indexed #(when (= (:id %2) id) %1) coll)))
-
 (defn change-diameter!
   "Update the active circle in the state with given diameter"
   [state diameter]
   (swap! state assoc
          :active-circle (assoc (:active-circle @state) :r (/ diameter 2))))
 
-(defn commit-diameter! 
+(defn commit-diameter!
   "Add the new circles with updated diameter to the undo stack"
   [state]
   (let [s @state
         new-circle (:active-circle s)
         circles (:circles s)
         position (find-pos (:id new-circle) circles)]
-  (swap! state assoc
-         :popup-open false
-         :redo-stack nil
-         :circles (assoc circles position new-circle)
-         :undo-stack (conj (:undo-stack s) (:circles s)))))
+    (when (not= (:r (circles position)) (:r new-circle))
+      (swap! state assoc
+             :popup-open false
+             :redo-stack nil
+             :circles (assoc circles position new-circle)
+             :undo-stack (conj (:undo-stack s) (:circles s))))))
+
+;; ========
+;; Checkers
+;; ========
 
 (defn is-active?
   "Check if given circle is the active circle in state"
   [circle state]
   (= (:id circle) (:id (:active-circle state))))
+
+;; =========
+;; Component
+;; =========
 
 (defn drawer []
   (let [state (r/atom {:circles []
@@ -119,8 +132,9 @@
                             :class (when (is-active? c @state) "active")
                             :on-click #(click-circle! % state c)
                             :on-mouse-over #(hover-circle! % state (:id c))}]))]
-        [:div.popup {:class (when (:popup-open @state) "open")
-                     :on-blur #(commit-diameter! state)
+        [:form.popup {:class (when (:popup-open @state) "open")
+                     :on-blur #((commit-diameter! state)
+                                (prn "BLUUURRRed"))
                      :style {:top (:y (:active-circle @state))
                              :left (:x (:active-circle @state))}}
          (if (:slider-open @state)

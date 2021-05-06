@@ -1,5 +1,6 @@
 (ns app.crud
   (:require [reagent.core :as r]
+            [app.utils :refer [find-pos vec-remove find-nearest]]
             [app.wrapper :refer [wrapper]]))
 
 ;; ==========
@@ -75,27 +76,10 @@
 ;; vector helpers
 ;; ==============
 
-(defn find-pos
-  "Find the position of a user in a vector by their uuid"
-  [id coll]
-  (first (keep-indexed #(when (= (:id %2) id) %1) coll)))
-
 (defn filter-users
   "Filter a list of users using filter prefix"
   [users ^string prefix]
   (filter #(re-find (re-pattern (str "(?i)" prefix)) (fullname %)) users))
-
-(defn vec-remove
-  "Remove an item from a vector at a given index"
-  [pos coll]
-  (vec (concat (subvec coll 0 pos) (subvec coll (inc pos)))))
-
-(defn find-nearest
-  "Find the nearest item in a collection from a given position"
-  [pos coll]
-  (if (>= (count coll) (inc pos))
-    (coll pos)
-    (last coll)))
 
 ;; ==============
 ;; State modifers
@@ -111,10 +95,10 @@
   [state]
   (let [s @state
         new-user (generate-user {:name (:name s) :surname (:surname s)})]
-    (when (can-create? s))
-    (swap! state assoc
-           :users (conj (:users s) new-user)
-           :selected (:id new-user))))
+    (when (can-create? s)
+      (swap! state assoc
+             :users (conj (:users s) new-user)
+             :selected (:id new-user)))))
 
 (defn handle-update!
   "Update the selected user with name and surname"
