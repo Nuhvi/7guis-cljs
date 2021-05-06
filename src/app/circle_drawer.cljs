@@ -26,27 +26,32 @@
    and store perivous circles in undo-stack,
    also save the new circle's id as the active circle"
   [e state]
-  (let [new-circle (circle-geo {:center (evt-center e)})]
-    (reset! state {:redo-stack nil
-                   :undo-stack (conj (:undo-stack @state) (:circles @state))
-                   :circles (conj (:circles @state) new-circle)
-                   :active-circle new-circle})))
+  (let [s @state
+        new-circle (circle-geo {:center (evt-center e)})]
+    (swap! state assoc
+           :redo-stack nil
+           :popup-open false
+           :active-circle new-circle
+           :circles (conj (:circles s) new-circle)
+           :undo-stack (conj (:undo-stack s) (:circles s)))))
 
 (defn undo!
   "Revert the state to the last saved change in undo-stack"
   [state]
-  (reset! state {:circles (first (:undo-stack @state))
-                 :redo-stack (conj (:redo-stack @state)
-                                   (:circles @state))
-                 :undo-stack (rest (:undo-stack @state))}))
+  (let [s @state]
+    (swap! state assoc
+           :circles (first (:undo-stack s))
+           :undo-stack (rest (:undo-stack s))
+           :redo-stack (conj (:redo-stack s) (:circles s)))))
 
 (defn redo!
   "Revert the state to the last saved change in redo-stack"
   [state]
-  (reset! state {:circles (first (:redo-stack @state))
-                 :undo-stack (conj (:undo-stack @state)
-                                   (:circles @state))
-                 :redo-stack (rest (:redo-stack @state))}))
+  (let [s @state]
+  (swap! state assoc
+         :circles (first (:redo-stack s))
+         :redo-stack (rest (:redo-stack s))
+         :undo-stack (conj (:undo-stack s) (:circles s)))))
 
 (defn click-circle!
   "Open a dialog box to edit circle diameter"
@@ -69,17 +74,24 @@
   [id coll]
   (first (keep-indexed #(when (= (:id %2) id) %1) coll)))
 
-(defn update-circle!
+(defn change-diameter!
   "Update the active circle in the state with given diameter"
   [state diameter]
+  (swap! state assoc
+         :active-circle (assoc (:active-circle @state) :r (/ diameter 2))))
+
+(defn commit-diameter! 
+  "Add the new circles with updated diameter to the undo stack"
+  [state]
   (let [s @state
-        circle (:active-circle s)
+        new-circle (:active-circle s)
         circles (:circles s)
-        position (find-pos (:id circle) circles)
-        updated (assoc circle :r (/ diameter 2))]
-    (swap! state assoc
-           :circles (assoc circles position updated)
-           :active-circle updated)))
+        position (find-pos (:id new-circle) circles)]
+  (swap! state assoc
+         :popup-open false
+         :redo-stack nil
+         :circles (assoc circles position new-circle)
+         :undo-stack (conj (:undo-stack s) (:circles s)))))
 
 (defn is-active?
   "Check if given circle is the active circle in state"
@@ -103,12 +115,12 @@
                   [:circle {:key (:id c)
                             :cx (:x c)
                             :cy (:y c)
-                            :r (:r c)
+                            :r (:r (if (is-active? c @state) (:active-circle @state) c))
                             :class (when (is-active? c @state) "active")
                             :on-click #(click-circle! % state c)
                             :on-mouse-over #(hover-circle! % state (:id c))}]))]
         [:div.popup {:class (when (:popup-open @state) "open")
-                     :on-blur #(swap! state assoc :popup-open false)
+                     :on-blur #(commit-diameter! state)
                      :style {:top (:y (:active-circle @state))
                              :left (:x (:active-circle @state))}}
          (if (:slider-open @state)
@@ -116,7 +128,7 @@
             [:p "Adjust Diameter"]
             [:input {:type "range"
                      :value (* 2 (:r (:active-circle @state)))
-                     :on-change #(update-circle! state (.. % -target -value))}]]
+                     :on-change #(change-diameter! state (.. % -target -value))}]]
            [:input {:type "button"
                     :value "Adjust Diameter"
                     :on-click #(swap! state assoc :slider-open true)}])]]
