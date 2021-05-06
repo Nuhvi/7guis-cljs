@@ -26,6 +26,38 @@
 ;; State modifers
 ;; ==============
 
+(defn get-distance
+  "Get the distance between two points by their coordinates"
+  [x1 y1 x2 y2]
+  (Math/sqrt (+ (Math/pow (- y2 y1) 2) (Math/pow (- x2 x1) 2))))
+
+(defn closest-circle
+  "Return the closest circle under the mouse"
+  [x y circles]
+  (->
+   (reduce
+    (fn [prev c]
+      (let [curr-distance (get-distance x y (:x c) (:y c))]
+        (if (and (< curr-distance (:r c))
+                 (< curr-distance (:d prev)))
+          {:d curr-distance :c c}
+          prev)))
+    {:d ##Inf}
+    circles)
+   :c))
+
+(defn hover-canvas!
+  "Set the id of active circle in state"
+  [e state]
+  (let [center (evt-center e)
+        x (first center)
+        y (last center)
+        s @state
+        closest-circle (closest-circle x y (:circles s))]
+    (when (and (not (:popup-open s))
+               (not= closest-circle (:active-circle s)))
+      (swap! state assoc :active-circle closest-circle))))
+
 (defn add-circle!
   "Add a circle to circles, reset the redo-stack,
    and store perivous circles in undo-stack,
@@ -55,12 +87,12 @@
   "Revert the state to the last saved change in redo-stack"
   [state]
   (let [s @state]
-  (swap! state assoc
-         :popup-open false
-         :active-circle nil
-         :circles (first (:redo-stack s))
-         :redo-stack (rest (:redo-stack s))
-         :undo-stack (conj (:undo-stack s) (:circles s)))))
+    (swap! state assoc
+           :popup-open false
+           :active-circle nil
+           :circles (first (:redo-stack s))
+           :redo-stack (rest (:redo-stack s))
+           :undo-stack (conj (:undo-stack s) (:circles s)))))
 
 (defn click-circle!
   "Open a dialog box to edit circle diameter"
@@ -70,13 +102,6 @@
          :active-circle c
          :popup-open true
          :slider-open false))
-
-(defn hover-circle!
-  "Set the id of active circle in state"
-  [e state id]
-  ;; (swap! state assoc :active id)
-  (js/console.log (clj->js (.-target e))
-  ))
 
 (defn change-diameter!
   "Update the active circle in the state with given diameter"
@@ -111,32 +136,33 @@
 ;; Component
 ;; =========
 
+(defonce INITIAL_STATE {:circles []
+                         :undo-stack nil
+                         :redo-stack nil
+                         :active-circle nil
+                         :popup-open false
+                         :slider-open false})
+
 (defn drawer []
-  (let [state (r/atom {:circles []
-                       :undo-stack nil
-                       :redo-stack nil
-                       :active-circle nil
-                       :popup-open false
-                       :slider-open false})]
+  (let [state (r/atom INITIAL_STATE)]
     (add-watch state :watcher
                (fn [_ _ old new] (js/console.log "old state " (clj->js old) ", new state " (clj->js new))))
     (fn []
       [wrapper {:title "Circle drawer"}
        [:div.canvas
-        [:svg {:on-click #(add-circle! % state)}
+        [:svg {:on-click #(add-circle! % state)
+               :on-mouse-move #(hover-canvas! % state)}
          (doall (for [c (:circles @state)]
                   [:circle {:key (:id c)
                             :cx (:x c)
                             :cy (:y c)
                             :r (:r (if (is-active? c @state) (:active-circle @state) c))
                             :class (when (is-active? c @state) "active")
-                            :on-click #(click-circle! % state c)
-                            :on-mouse-over #(hover-circle! % state (:id c))}]))]
+                            :on-click #(click-circle! % state c)}]))]
         [:form.popup {:class (when (:popup-open @state) "open")
-                     :on-blur #((commit-diameter! state)
-                                (prn "BLUUURRRed"))
-                     :style {:top (:y (:active-circle @state))
-                             :left (:x (:active-circle @state))}}
+                      :on-blur #(commit-diameter! state)
+                      :style {:top (:y (:active-circle @state))
+                              :left (:x (:active-circle @state))}}
          (if (:slider-open @state)
            [:div
             [:p "Adjust Diameter"]
@@ -154,4 +180,8 @@
         [:input {:type "button"
                  :value "Redo"
                  :on-click #(redo! state)
-                 :aria-disabled (zero? (count (:redo-stack @state)))}]]])))
+                 :aria-disabled (zero? (count (:redo-stack @state)))}]
+        [:input {:type "button"
+                 :value "Reset"
+                 :on-click #(reset! state INITIAL_STATE)
+                 :aria-disabled (zero? (count (:circles @state)))}]]])))
