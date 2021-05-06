@@ -3,29 +3,6 @@
             [app.utils :refer [find-pos]]
             [app.wrapper :refer [wrapper]]))
 
-(defonce RADIUS 15)
-
-(defn evt-center
-  "Return x and y coordinates of a DOM event"
-  [e]
-  (let [target (.-currentTarget e)
-        rect (.getBoundingClientRect target)
-        x (- (.-clientX e) (-> rect .-left int))
-        y (- (.-clientY e) (-> rect .-top int))]
-    (list x y)))
-
-(defn circle-geo
-  "Retrun an object representing a circle"
-  ([{:keys [center radius id]}]
-   {:id (or id (random-uuid))
-    :x (first center)
-    :y (last center)
-    :r (or radius RADIUS)}))
-
-;; ==============
-;; State modifers
-;; ==============
-
 ;; ========
 ;; Checkers
 ;; ========
@@ -44,6 +21,34 @@
   "Check if the state has more steps to undo"
   [state]
   (seq (:redo-stack state)))
+
+(defn should-reset?
+ "Check if there is anything to reset"
+ [state]
+ (seq (:circles state)))
+
+;; ========
+;; Geometry
+;; ========
+
+(defonce RADIUS 15)
+
+(defn evt-center
+  "Return x and y coordinates of a DOM event"
+  [e]
+  (let [target (.-currentTarget e)
+        rect (.getBoundingClientRect target)
+        x (- (.-clientX e) (-> rect .-left int))
+        y (- (.-clientY e) (-> rect .-top int))]
+    (list x y)))
+
+(defn circle-geo
+  "Retrun an object representing a circle"
+  ([{:keys [center radius id]}]
+   {:id (or id (random-uuid))
+    :x (first center)
+    :y (last center)
+    :r (or radius RADIUS)}))
 
 (defn get-distance
   "Get the distance between two points by their coordinates"
@@ -64,6 +69,10 @@
     {:d ##Inf}
     circles)
    :c))
+
+;; ==============
+;; State modifers
+;; ==============
 
 (defn hover-canvas!
   "Set the id of active circle in state"
@@ -184,8 +193,6 @@
 
 (defn drawer []
   (let [state (r/atom INITIAL_STATE)]
-    (add-watch state :watcher
-               (fn [_ _ old new] (js/console.log "old state " (clj->js old) ", new state " (clj->js new))))
     (fn []
       [wrapper {:title "Circle drawer"}
        [:div.canvas
@@ -210,6 +217,6 @@
                  :aria-disabled (not (can-redo? @state))}]
         [:input {:type "button"
                  :value "Reset"
-                 ;; TODO add can-reset?
-                 :on-click #(reset! state INITIAL_STATE)
-                 :aria-disabled (zero? (count (:circles @state)))}]]])))
+                 :on-click #(when (should-reset? @state)
+                              (reset! state INITIAL_STATE))
+                 :aria-disabled (should-reset? @state)}]]])))
