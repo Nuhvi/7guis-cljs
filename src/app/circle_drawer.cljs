@@ -157,31 +157,47 @@
 ;; Component
 ;; =========
 
-(defn modified-origin
+(defn force-within-parent
   "Return a translated origin to avoid having the popup out of canvas"
-  ;; TODO implement the intersection calculations
-  [origin]
-  (list (:x origin) (:y origin)))
+  [node x y p]
+  (let  [nw (.-clientWidth node)
+         nh (.-clientHeight node)
+         parent (.-parentNode node)
+         x2 (-> (.-clientWidth parent)
+                 (- p nw)
+                 (min x) ;; keep 'p' space before right border
+                 (max p)) ;; keep 'p' space after left border
+         y2 (-> (.-clientHeight parent)
+                (- p nh)
+                (min y) ;; keep 'p' space higher than bottom border
+                (max p))] ;; keep 'p' space lower than left border
+    (.setAttribute node "style" (str "left: " x2 "px;top: " y2 "px"))))
 
 (defn popup
   [state]
-  (let [[x y] (modified-origin (:active-circle @state))]
-    (fn []
-      [:form.popup {:class (when (:popup-open? @state) "open")
-                    :on-blur #(do (commit-diameter! state)
-                                  (swap! state assoc :popup-open? false))
-                    :style {:left x :top y}}
-       (if (:slider-open? @state)
-         [:div
-          [:p "Adjust Diameter"]
-          [:input {:auto-focus true
-                   :type "range"
-                   :value (* 2 (:r (:active-circle @state)))
-                   :on-change #(change-diameter! state (.. % -target -value))}]]
-         [:input {:auto-focus true
-                  :type "button"
-                  :value "Adjust Diameter"
-                  :on-click #(swap! state assoc :slider-open? true)}])])))
+  (let [s @state
+        c (:active-circle s)
+        x (:x c)
+        y (:y c)]
+    (r/create-class
+     {:component-did-mount #(force-within-parent (r/dom-node %) x y 10)
+      :reagent-render
+      (fn []
+        [:form.popup {:class (when (:popup-open? s) "open")
+                      :on-blur #(do (commit-diameter! state)
+                                    (swap! state assoc :popup-open? false))
+                      :style {:left x :top y}}
+         (if (:slider-open? @state)
+           [:div
+            [:p "Adjust Diameter"]
+            [:input {:auto-focus true
+                     :type "range"
+                     :value (* 2 (:r c))
+                     :on-change #(change-diameter! state (.. % -target -value))}]]
+           [:input {:auto-focus true
+                    :type "button"
+                    :value "Adjust Diameter"
+                    :on-click #(swap! state assoc :slider-open? true)}])])})))
 
 
 (defonce INITIAL_STATE {:circles []
