@@ -275,7 +275,6 @@ select.field.full-width option {
 }
 
 .circle-drawer .popup {
-  display: none;
   position: absolute;
   z-index: 999999;
   width: fit-content;
@@ -288,8 +287,4 @@ select.field.full-width option {
 
 .popup p {
   margin-bottom: 0.3em;
-}
-
-.circle-drawer .popup.open {
-  display: block;
 }

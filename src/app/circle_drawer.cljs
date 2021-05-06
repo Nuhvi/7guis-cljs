@@ -26,6 +26,25 @@
 ;; State modifers
 ;; ==============
 
+;; ========
+;; Checkers
+;; ========
+
+(defn is-active?
+  "Check if given circle is the active circle in state"
+  [circle state]
+  (= (:id circle) (:id (:active-circle state))))
+
+(defn can-undo?
+  "Check if the state has more steps to undo"
+  [state]
+  (seq (:undo-stack state)))
+
+(defn can-redo?
+  "Check if the state has more steps to undo"
+  [state]
+  (seq (:redo-stack state)))
+
 (defn get-distance
   "Get the distance between two points by their coordinates"
   [x1 y1 x2 y2]
@@ -54,7 +73,7 @@
         y (last center)
         s @state
         closest-circle (closest-circle x y (:circles s))]
-    (when (and (not (:popup-open s))
+    (when (and (not (:popup-open? s))
                (not= closest-circle (:active-circle s)))
       (swap! state assoc :active-circle closest-circle))))
 
@@ -67,7 +86,7 @@
         new-circle (circle-geo {:center (evt-center e)})]
     (swap! state assoc
            :redo-stack nil
-           :popup-open false
+           :popup-open? false
            :active-circle new-circle
            :circles (conj (:circles s) new-circle)
            :undo-stack (conj (:undo-stack s) (:circles s)))))
@@ -76,23 +95,25 @@
   "Revert the state to the last saved change in undo-stack"
   [state]
   (let [s @state]
-    (swap! state assoc
-           :popup-open false
-           :active-circle nil
-           :circles (first (:undo-stack s))
-           :undo-stack (rest (:undo-stack s))
-           :redo-stack (conj (:redo-stack s) (:circles s)))))
+    (when (can-undo? s)
+      (swap! state assoc
+             :popup-open? false
+             :active-circle nil
+             :circles (first (:undo-stack s))
+             :undo-stack (rest (:undo-stack s))
+             :redo-stack (conj (:redo-stack s) (:circles s))))))
 
 (defn redo!
   "Revert the state to the last saved change in redo-stack"
   [state]
   (let [s @state]
-    (swap! state assoc
-           :popup-open false
-           :active-circle nil
-           :circles (first (:redo-stack s))
-           :redo-stack (rest (:redo-stack s))
-           :undo-stack (conj (:undo-stack s) (:circles s)))))
+    (when (can-redo? s)
+      (swap! state assoc
+             :popup-open? false
+             :active-circle nil
+             :circles (first (:redo-stack s))
+             :redo-stack (rest (:redo-stack s))
+             :undo-stack (conj (:undo-stack s) (:circles s))))))
 
 (defn click-circle!
   "Open a dialog box to edit circle diameter"
@@ -100,8 +121,8 @@
   (.stopPropagation e)
   (swap! state assoc
          :active-circle c
-         :popup-open true
-         :slider-open false))
+         :popup-open? true
+         :slider-open? false))
 
 (defn change-diameter!
   "Update the active circle in the state with given diameter"
@@ -118,30 +139,48 @@
         position (find-pos (:id new-circle) circles)]
     (when (not= (:r (circles position)) (:r new-circle))
       (swap! state assoc
-             :popup-open false
+             :popup-open? false
              :redo-stack nil
              :circles (assoc circles position new-circle)
              :undo-stack (conj (:undo-stack s) (:circles s))))))
-
-;; ========
-;; Checkers
-;; ========
-
-(defn is-active?
-  "Check if given circle is the active circle in state"
-  [circle state]
-  (= (:id circle) (:id (:active-circle state))))
 
 ;; =========
 ;; Component
 ;; =========
 
+(defn modified-origin
+  "Return a translated origin to avoid having the popup out of canvas"
+  ;; TODO implement the intersection calculations
+  [origin]
+  (list (:x origin) (:y origin)))
+
+(defn popup
+  [state]
+  (let [[x y] (modified-origin (:active-circle @state))]
+    (fn []
+      [:form.popup {:class (when (:popup-open? @state) "open")
+                    :on-blur #(do (commit-diameter! state)
+                                  (swap! state assoc :popup-open? false))
+                    :style {:left x :top y}}
+       (if (:slider-open? @state)
+         [:div
+          [:p "Adjust Diameter"]
+          [:input {:auto-focus true
+                   :type "range"
+                   :value (* 2 (:r (:active-circle @state)))
+                   :on-change #(change-diameter! state (.. % -target -value))}]]
+         [:input {:auto-focus true
+                  :type "button"
+                  :value "Adjust Diameter"
+                  :on-click #(swap! state assoc :slider-open? true)}])])))
+
+
 (defonce INITIAL_STATE {:circles []
                          :undo-stack nil
                          :redo-stack nil
                          :active-circle nil
-                         :popup-open false
-                         :slider-open false})
+                         :popup-open? false
+                         :slider-open? false})
 
 (defn drawer []
   (let [state (r/atom INITIAL_STATE)]
@@ -159,29 +198,18 @@
                             :r (:r (if (is-active? c @state) (:active-circle @state) c))
                             :class (when (is-active? c @state) "active")
                             :on-click #(click-circle! % state c)}]))]
-        [:form.popup {:class (when (:popup-open @state) "open")
-                      :on-blur #(commit-diameter! state)
-                      :style {:top (:y (:active-circle @state))
-                              :left (:x (:active-circle @state))}}
-         (if (:slider-open @state)
-           [:div
-            [:p "Adjust Diameter"]
-            [:input {:type "range"
-                     :value (* 2 (:r (:active-circle @state)))
-                     :on-change #(change-diameter! state (.. % -target -value))}]]
-           [:input {:type "button"
-                    :value "Adjust Diameter"
-                    :on-click #(swap! state assoc :slider-open true)}])]]
+        (when (:popup-open? @state) [popup state])]
        [:div.buttons
         [:input {:type "button"
                  :value "Undo"
                  :on-click #(undo! state)
-                 :aria-disabled (zero? (count (:undo-stack @state)))}]
+                 :aria-disabled (not (can-undo? @state))}]
         [:input {:type "button"
                  :value "Redo"
                  :on-click #(redo! state)
-                 :aria-disabled (zero? (count (:redo-stack @state)))}]
+                 :aria-disabled (not (can-redo? @state))}]
         [:input {:type "button"
                  :value "Reset"
+                 ;; TODO add can-reset?
                  :on-click #(reset! state INITIAL_STATE)
                  :aria-disabled (zero? (count (:circles @state)))}]]])))
