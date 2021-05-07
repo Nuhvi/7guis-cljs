@@ -164,9 +164,9 @@
          nh (.-clientHeight node)
          parent (.-parentNode node)
          x2 (-> (.-clientWidth parent)
-                 (- p nw)
-                 (min x) ;; keep 'p' space before right border
-                 (max p)) ;; keep 'p' space after left border
+                (- p nw)
+                (min x) ;; keep 'p' space before right border
+                (max p)) ;; keep 'p' space after left border
          y2 (-> (.-clientHeight parent)
                 (- p nh)
                 (min y) ;; keep 'p' space higher than bottom border
@@ -181,6 +181,7 @@
         y (:y c)]
     (r/create-class
      {:component-did-mount #(force-within-parent (r/dom-node %) x y 10)
+      :component-did-update #(force-within-parent (r/dom-node %) x y 10)
       :reagent-render
       (fn []
         [:form.popup {:class (when (:popup-open? s) "open")
@@ -192,7 +193,7 @@
             [:p "Adjust Diameter"]
             [:input {:auto-focus true
                      :type "range"
-                     :value (* 2 (:r c))
+                     :value (* 2 (:r (:active-circle @state)))
                      :on-change #(change-diameter! state (.. % -target -value))}]]
            [:input {:auto-focus true
                     :type "button"
