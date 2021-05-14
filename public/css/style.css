@@ -66,13 +66,37 @@ a[href] {
   flex-direction: column;
 }
 
+.component .top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 1em;
+  height: 40px;
+}
+
+.component .top-row .code-url {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 16px;
+  width: 16px;
+  border-radius: 999px;
+  background-color: var(--colors-leva__highlight1);
+  transition: background-color 250ms ease;
+}
+
+.component .top-row .code-url:hover {
+  background-color: var(--colors-leva__highlight3);
+}
+
+.component .top-row .code-url svg {
+  width: 70%;
+  fill: var(--colors-leva__elevation1);
+}
+
 .component * {
   font-family: inherit;
   box-sizing: border-box;
-}
-
-.component .title {
-  padding: 1em;
 }
 
 .component .content {

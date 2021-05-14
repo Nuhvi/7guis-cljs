@@ -2,7 +2,7 @@
   "This namespace contains your application and is the entrypoint for 'yarn start'."
   (:require [reagent.core :as r]
             [app.counter :refer [counter]]
-            [app.temp-converter :refer [converter]]
+            [app.temperature-converter :refer [converter]]
             [app.flight-booker :refer [booker]]
             [app.timer :refer [timer]]
             [app.crud :refer [crud]]

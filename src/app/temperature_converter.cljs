@@ -1,4 +1,4 @@
-(ns app.temp-converter
+(ns app.temperature-converter
   (:require [reagent.core :as r]
             [app.wrapper :refer [wrapper]]))
 
