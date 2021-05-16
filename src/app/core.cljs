@@ -6,7 +6,8 @@
             [app.flight-booker :refer [booker]]
             [app.timer :refer [timer]]
             [app.crud :refer [crud]]
-            [app.circle-drawer :refer [drawer]]))
+            [app.circle-drawer :refer [drawer]]
+            [app.cells :refer [cells]]))
 
 (defn app []
   [:main
@@ -36,7 +37,8 @@
     [booker]
     [timer 15]
     [crud]
-    [drawer]]])
+    [drawer]
+    [cells]]])
 
 (defn ^:dev/after-load render
   "Render the toplevel component for this app."

@@ -184,7 +184,9 @@ select.field.full-width option {
 }
 
 .app ::-webkit-scrollbar {
+  height: 6px;
   width: 6px;
+  box-shadow: 0 0 1px 0 black;
 }
 
 .app ::-webkit-scrollbar-button {
@@ -194,7 +196,7 @@ select.field.full-width option {
 }
 
 .app ::-webkit-scrollbar-corner {
-  background-color: transparent;
+  background: var(--colors-leva__elevation1);
 }
 
 .app ::-webkit-scrollbar-thumb {
@@ -213,6 +215,11 @@ select.field.full-width option {
   outline: none;
   border: none;
   position: relative;
+}
+
+.field,
+.canvas,
+.cells table {
   border-radius: var(--radii-leva__sm);
   background-color: var(--colors-leva__elevation3);
   box-shadow: inset 0 0 0 var(--borderWidths-leva__input)
@@ -276,7 +283,6 @@ select.field.full-width option {
 }
 
 .canvas {
-  background-color: var(--colors-leva__elevation1);
   height: calc(var(--sizes-leva__rootWidth) / 1.5);
   position: relative;
 }
@@ -311,4 +317,66 @@ select.field.full-width option {
 
 .popup p {
   margin-bottom: 0.3em;
+}
+
+@media (min-width: 690px) {
+  .cells {
+    width: 584px;
+    grid-column: 1 / 3;
+  }
+}
+
+.cells table {
+  display: block;
+  max-width: 100%;
+  max-height: 360px;
+  overflow-x: scroll;
+}
+
+.cells tbody {
+  min-width: 100%;
+}
+
+.cells th,
+.cells tr td.row-no {
+  font-weight: bold;
+  text-align: center;
+  text-transform: capitalize;
+  border-radius: 2px;
+  padding: 0 0.5em;
+  background-color: var(--colors-leva__elevation1);
+  color: var(--colors-leva__highlight1);
+}
+
+.cell {
+  position: relative;
+
+  width: 100%;
+  background: none;
+  border: 1px solid var(--colors-leva__elevation1);
+  border-radius: 3px;
+
+  padding: 0.5em;
+  min-width: 90px;
+  height: 30px;
+  outline: none;
+}
+
+.cell:focus-within {
+  border-color: var(--colors-leva__accent3);
+  color: var(--colors-leva__highlight3);
+}
+
+.cell input {
+  background: none;
+  border: none;
+  padding: 0;
+  outline: none;
+  width: 100%;
+  color: inherit;
+  font-size: inherit;
+}
+
+.cell .value {
+  pointer-events: none;
 }
