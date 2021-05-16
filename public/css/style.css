@@ -380,3 +380,32 @@ select.field.full-width option {
 .cell .value {
   pointer-events: none;
 }
+
+.help .icon {
+  margin-left: auto;
+  padding: 2px;
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  display: block;
+}
+
+.help .icon svg {
+  fill: var(--colors-leva__highlight2);
+}
+
+.help .icon:hover svg {
+  fill: var(--colors-leva__highlight3);
+}
+
+.help .data {
+  height: 0;
+  overflow: hidden;
+  transition: all 0.3s;
+}
+
+.help .data.open {
+  height: 170px;
+}

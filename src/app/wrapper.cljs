@@ -12,7 +12,7 @@
   [string]
   (str/replace (str/lower-case string) #"\s" "_"))
 
-(def source-code-svg
+(defonce source-code-svg
   [:svg {:xmlns "http://www.w3.org/2000/svg"
          :xmlnsXlink "http://www.w3.org/1999/xlink"
          :version "1.1"
@@ -26,15 +26,15 @@
     [:path
      {:d "M603.2,154l102.2,47.7L405,846l-102.2-47.7L603.2,154z"}]]])
 
-(def BASE_URL "https://github.com/Nazeh/7guis-cljs/tree/master/src/app/")
+(defonce BASE_URL "https://github.com/Nazeh/7guis-cljs/tree/master/src/app/")
 
 (defn wrapper [{:keys [title class]}]
   (let [this (r/current-component)]
-   [:div.component {:class (str/lower-case (or class (kebab-case title)))}
-    [:div.top-row
-     [:p.title title]
-     [:a.code-url
-      {:target "_blank"
-       :href (str BASE_URL (snake-case title) ".cljs")}
-      source-code-svg]]
-    (into  [:div.content] (r/children this))]))
+    [:div.component {:class (str/lower-case (or class (kebab-case title)))}
+     [:div.top-row
+      [:p.title title]
+      [:a.code-url
+       {:target "_blank"
+        :href (str BASE_URL (snake-case title) ".cljs")}
+       source-code-svg]]
+     (into  [:div.content] (r/children this))]))
