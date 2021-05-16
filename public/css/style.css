@@ -231,7 +231,8 @@ select.field.full-width option {
 }
 
 .invalid .field,
-.field.invalid {
+.field.invalid,
+.cell.invalid {
   box-shadow: inset 0 0 6px rgb(122, 17, 17);
 }
 
@@ -407,5 +408,5 @@ select.field.full-width option {
 }
 
 .help .data.open {
-  height: 170px;
+  height: 190px;
 }

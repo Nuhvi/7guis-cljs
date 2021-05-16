@@ -8,7 +8,7 @@
 
 (defonce COLUMNS (map char (range 65 91)))
 
-(defonce INITIAL_CELL {:form nil
+(defonce INITIAL_CELL {:formula nil
                        :value nil})
 
 (defn- generate-cell-id
@@ -61,28 +61,46 @@
 ;; Cell update functions
 ;; =====================
 
-(defn update-cell!
-  "Updates a cell's form"
-  [cell form]
-  (swap! cell assoc :form form))
+(defn- evaluate
+  "Evaluate a formula and return the result or set an error"
+  [formula]
+  (if (= "=" (first formula))
+    "#Error!"
+    formula))
 
-(defn handle-key-down-input
+(defn update-cell!
+  "Updates a cell's formula"
+  [cell formula]
+  (swap! cell assoc :formula formula))
+
+(defn- set-value!
+  "Evaluate the formula and update the value in a cell"
+  [cell]
+  (swap! cell assoc :value (evaluate (:formula @cell))))
+
+;; ==============
+;; Event handlers
+;; ==============
+
+(defn handle-key-down-input!
   "Handle key press event in a cell"
   [ev cell]
   (.stopPropagation ev)
-  (case (.-key ev)
-    "Enter" (move-focus (.. ev -target -parentElement) :down)
-    (update-cell! cell (.. ev -target -value))))
+  (prn (.-key ev))
+  (let [key (.-key ev)]
+    (if (or (= key "Enter") (= key "Escape"))
+      (move-focus (.. ev -target -parentElement) :down)
+      (update-cell! cell (.. ev -target -value)))))
 
-(defn- handle-key-down-cell
+(defn- handle-key-down-cell!
   "Start editing a cell on Enter, or navigate for arrow keys"
-  [ev active cell]
+  [ev edit-mode? cell]
   (let [key (.-key ev)
         target (.-target ev)]
     (when (not= key "Tab") (.preventDefault ev))
     (case key
-      "Enter" (reset! active true)
-      " " (reset! active true)
+      "Enter" (reset! edit-mode? true)
+      " " (reset! edit-mode? true)
       "ArrowRight" (move-focus target :right)
       "ArrowLeft" (move-focus target :left)
       "ArrowUp" (move-focus target :up)
@@ -97,12 +115,19 @@
                :else (move-focus target :last-in-row))
       "Delete" (update-cell! cell "")
       ;; Enter edit mode if any single character was down
-      (when (= 1 (count key)) (reset! active true)))))
+      (when (= 1 (count key)) (do (reset! edit-mode? true)
+                                  (update-cell! cell key))))))
 
 (defn- should-blur
   "Check that the new focus target is not a child of the event currentTarget"
   [ev]
   (not (.contains (.-currentTarget ev) (.-relatedTarget ev))))
+
+(defn- handle-blur-cell!
+  [ev cell edit-mode?]
+  (when (should-blur ev)
+    ((reset! edit-mode? false)
+     (set-value! cell))))
 
 ;; ==========
 ;; Components
@@ -111,21 +136,24 @@
 (defn cell
   "Renders a cell given its atom"
   [col row]
-  (let [active (r/atom false)
+  (let [edit-mode? (r/atom false)
         cell-id (generate-cell-id col row)
         cell (get sheet cell-id)]
     (fn []
-      (let [form (:form @cell)]
-        [:td.cell {:tab-index (if @active -1 0)
-                   :on-key-down #(handle-key-down-cell % active cell)
-                   :on-blur #(when (should-blur %) (reset! active false))
-                   :on-double-click #(reset! active true)}
-         (if @active
+      (let [c @cell
+            formula (:formula c)
+            value (:value c)]
+        [:td.cell {:class (when (= value "#Error!") "invalid")
+                   :tab-index (if @edit-mode? -1 0)
+                   :on-key-down #(handle-key-down-cell! % edit-mode? cell)
+                   :on-blur #(handle-blur-cell! % cell edit-mode?)
+                   :on-double-click #(reset! edit-mode? true)}
+         (if @edit-mode?
            [:input {:auto-focus true
-                    :on-focus #(set! (.. % -target -value) form)
+                    :on-focus #(set! (.. % -target -value) formula)
                     :on-change #(update-cell! cell (.. % -target -value))
-                    :on-key-down #(handle-key-down-input % cell)}]
-           [:div.value form])]))))
+                    :on-key-down #(handle-key-down-input! % cell)}]
+           [:div.value value])]))))
 
 (defn row
   "Draws a table row"
@@ -150,13 +178,15 @@
                    :on-click #(swap! open not)}
         help-svg]
        [:div.data {:class (when @open "open")}
-        [:p "Edit: "
+        [:div "Edit mode: "
          [:ol
           [:li "Enter: to enter or exit edit mode"]
-          [:li "Space / type any character / Double click : to start editing a cell"]
+          [:li "Escape: exit edit mode"]
+          [:li "Space / Double click : to start editing a cell"]
+          [:li "Type any character: override formula"]
           [:li "Delete: empty a cell"]
         ]]
-        [:p "Navigation: "
+        [:div "Navigation: "
          [:ol
           [:li "Arrow keys: move to neighboring cells"]
           [:li "Home / End: move to the first or last cell in a row"]
