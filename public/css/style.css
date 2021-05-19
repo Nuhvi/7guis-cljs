@@ -382,6 +382,10 @@ select.field.full-width option {
   pointer-events: none;
 }
 
+.cell.invalid .value {
+  color: var(--colors-leva__highlight1);
+}
+
 .help .icon {
   margin-left: auto;
   padding: 2px;

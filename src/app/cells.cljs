@@ -1,5 +1,7 @@
 (ns app.cells
   (:require [reagent.core :as r]
+            [clojure.string :as str]
+            [cljs.reader :as reader]
             [app.wrapper :refer [wrapper]]))
 
 ;; ===============
@@ -57,40 +59,81 @@
            false)
          (.focus))))
 
-;; =====================
-;; Cell update functions
-;; =====================
+;; ===================
+;; Formula evaluations
+;; ===================
 
-(defn- evaluate
-  "Evaluate a formula and return the result or set an error"
-  [formula]
-  (if (= "=" (first formula))
-    "#Error!"
-    formula))
+(defonce OPERATORS {:sum +
+                    :sub -
+                    :div /})
 
-(defn update-cell!
-  "Updates a cell's formula"
-  [cell formula]
-  (swap! cell assoc :formula formula))
+(defn- resolve-symbol
+  "Find a predefined operator by its symbol"
+  [symbol]
+  (get OPERATORS (->> symbol str str/lower-case keyword)))
+
+(def formula-matcher #"([a-zA-Z]+)\s*\((.*)?\)")
+
+(defn- has-formula?
+  "Check if there is an excel like formula in a string"
+  [string]
+  (re-find formula-matcher string))
+
+(defn- lispify
+  "Format a formula to a clojure form notation"
+  [string]
+  (if (has-formula? string)
+    (lispify (str/replace string formula-matcher "($1, $2)"))
+    string))
+
+(defn- eval-form
+  "Evaluate form recursively after resolving operators"
+  [form]
+  (let [resolved (map #(cond (list? %) (eval-form %)
+                             (symbol? %) (resolve-symbol %)
+                             :else %)
+                      form)
+        operator (first resolved)
+        args (rest resolved)]
+    (try
+      (apply operator args)
+      (catch :default _ :error))))
+
+(defn- eval-str
+  "Evaluate a formula string"
+  [string]
+  (if (has-formula? string)
+    (->> string
+         (lispify)
+         (reader/read-string)
+         (eval-form))
+    string))
 
 (defn- set-value!
   "Evaluate the formula and update the value in a cell"
   [cell]
-  (swap! cell assoc :value (evaluate (:formula @cell))))
+  (let [formula (:formula @cell)]
+    (swap! cell assoc :value (if (= "=" (first formula))
+                               (eval-str (subs formula 1))
+                               formula))))
 
 ;; ==============
 ;; Event handlers
 ;; ==============
+                               
+(defn update-formula!
+  "Updates a cell's formula"
+  [cell formula]
+  (swap! cell assoc :formula formula))
 
 (defn handle-key-down-input!
   "Handle key press event in a cell"
   [ev cell]
   (.stopPropagation ev)
-  (prn (.-key ev))
   (let [key (.-key ev)]
     (if (or (= key "Enter") (= key "Escape"))
       (move-focus (.. ev -target -parentElement) :down)
-      (update-cell! cell (.. ev -target -value)))))
+      (update-formula! cell (.. ev -target -value)))))
 
 (defn- handle-key-down-cell!
   "Start editing a cell on Enter, or navigate for arrow keys"
@@ -112,11 +155,12 @@
       "End" (cond
               (.-ctrlKey ev) (move-focus target :last)
               (.-altKey ev) (move-focus target :last-in-col)
-               :else (move-focus target :last-in-row))
-      "Delete" (update-cell! cell "")
+              :else (move-focus target :last-in-row))
+      "Delete" (update-formula! cell "")
       ;; Enter edit mode if any single character was down
-      (when (= 1 (count key)) (do (reset! edit-mode? true)
-                                  (update-cell! cell key))))))
+      (when (= 1 (count key))
+        (reset! edit-mode? true)
+        (update-formula! cell key)))))
 
 (defn- should-blur
   "Check that the new focus target is not a child of the event currentTarget"
@@ -126,8 +170,8 @@
 (defn- handle-blur-cell!
   [ev cell edit-mode?]
   (when (should-blur ev)
-    ((reset! edit-mode? false)
-     (set-value! cell))))
+    (reset! edit-mode? false)
+    (set-value! cell)))
 
 ;; ==========
 ;; Components
@@ -143,7 +187,7 @@
       (let [c @cell
             formula (:formula c)
             value (:value c)]
-        [:td.cell {:class (when (= value "#Error!") "invalid")
+        [:td.cell {:class (when (= value :error) "invalid")
                    :tab-index (if @edit-mode? -1 0)
                    :on-key-down #(handle-key-down-cell! % edit-mode? cell)
                    :on-blur #(handle-blur-cell! % cell edit-mode?)
@@ -151,9 +195,9 @@
          (if @edit-mode?
            [:input {:auto-focus true
                     :on-focus #(set! (.. % -target -value) formula)
-                    :on-change #(update-cell! cell (.. % -target -value))
+                    :on-change #(update-formula! cell (.. % -target -value))
                     :on-key-down #(handle-key-down-input! % cell)}]
-           [:div.value value])]))))
+           [:div.value (if (= value :error) "#ERROR!" value)])]))))
 
 (defn row
   "Draws a table row"
