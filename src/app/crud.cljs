@@ -7,7 +7,7 @@
 ;; Generators
 ;; ==========
 
-(defn initial-state
+(defn- initial-state
   "Generate the intial state of the crud component,
    given an intial vector of users"
   [users]
@@ -17,12 +17,12 @@
    :users users
    :selected (:id (first users))})
 
-(defn fullname
+(defn- fullname
   "Generate fullname from user's name and surname"
   [user]
   (str (:surname user) ", " (:name user)))
 
-(defn generate-user
+(defn- generate-user
   "Generate a user using name, surname and id,
    or generate random uuid if id is not provided"
   [{:keys [name surname id]}]
@@ -34,30 +34,30 @@
 ;; Checkers
 ;; ========
 
-(defn valid-input?
+(defn- valid-input?
   "Check if both the name and surname are not empty"
   [state]
   (and (seq (:name state))
        (seq (:surname state))))
 
-(defn has-selected?
+(defn- has-selected?
   "Checks if the state has a selected id"
   [state]
   (seq (:selected state)))
 
-(defn has-no-prefix?
+(defn- has-no-prefix?
   "check if the state has no perfix input for filtering"
   [state]
   (not (seq (:prefix state))))
 
-(defn can-create?
+(defn- can-create?
   "Check if the state has no prefix,
    but contains valid name and surname"
   [state]
   (and (valid-input? state)
        (has-no-prefix? state)))
 
-(defn can-update?
+(defn- can-update?
   "Check if the state has an active selection, 
    no prefix and valid name and surname"
   [state]
@@ -65,7 +65,7 @@
        (valid-input? state)
        (has-no-prefix? state)))
 
-(defn can-delete?
+(defn- can-delete?
   "Check if the state has an active selection,
    and no prefix"
   [state]
@@ -76,7 +76,7 @@
 ;; vector helpers
 ;; ==============
 
-(defn filter-users
+(defn- filter-users
   "Filter a list of users using filter prefix"
   [users ^string prefix]
   (filter #(re-find (re-pattern (str "(?i)" prefix)) (fullname %)) users))
@@ -85,12 +85,12 @@
 ;; State modifers
 ;; ==============
 
-(defn set-target-value
+(defn- set-target-value
   "Set the value of a given key in the state to the event target value"
   [state key event]
   (swap! state assoc key (.. event -target -value)))
 
-(defn handle-create!
+(defn- handle-create!
   "Create new user and switch selected its uuid"
   [state]
   (let [s @state
@@ -100,7 +100,7 @@
              :users (conj (:users s) new-user)
              :selected (:id new-user)))))
 
-(defn handle-update!
+(defn- handle-update!
   "Update the selected user with name and surname"
   [state]
   (let [s @state
@@ -113,7 +113,7 @@
              [:users position]
              (generate-user {:id id :name name :surname surname})))))
 
-(defn handle-delete!
+(defn- handle-delete!
   "Delete an user and switch focus to the first user"
   [state]
   (let [s @state
@@ -128,7 +128,7 @@
 ;; Components
 ;; ==========
 
-(defn listbox
+(defn- listbox
   "Renders the listbox using a given list of users"
   [{:keys [list value on-change]}]
   [:div.row

@@ -2,24 +2,24 @@
   (:require [reagent.core :as r]
             [app.wrapper :refer [wrapper]]))
 
-(defn sci-format
+(defn- sci-format
   "Convert to the scientific notation if the number is >= 10^12"
   [number]
   (if (>= number 1e12)
     (.toExponential number 6)
     number))
 
-(defn c-to-f
+(defn- c-to-f
   "Contvert celsius to fahrenheit"
   [c]
   (+ 32 (* c (/ 9 5))))
 
-(defn f-to-c
+(defn- f-to-c
   "Contvert fahrenheit to celsius "
   [f]
   (* (- f 32) (/ 5 9)))
 
-(defn convert
+(defn- convert
   "Convert temprature according to target unit"
   [unit temp]
   (->
@@ -29,7 +29,7 @@
    Math/round
    sci-format))
 
-(defn disable
+(defn- disable
   "Return the state with the :err set to 'disabled'"
   [state key]
   (assoc (key @state) :err "disabled"))
@@ -41,7 +41,7 @@
   [string]
   (not (js/Number.isNaN (js/Number string))))
 
-(defn update-state!
+(defn- update-state!
   "Update the state after validating the new-val"
   [state new-val key opposite-key]
   (if (= new-val "")
@@ -54,12 +54,12 @@
       (reset! state {key {:val new-val :err "invalid"}
                      opposite-key (disable state opposite-key)}))))
 
-(defn set-celsius! 
+(defn- set-celsius! 
   "Set the celsius temprature and update the rest accordingly"
   [state e]
   (update-state! state (.. e -target -value) :cel :fah))
 
-(defn set-fahrenheit! 
+(defn- set-fahrenheit! 
   "Set the fahrenheit temprature and update the rest accordingly"
   [state e]
   (update-state! state (.. e -target -value) :fah :cel))

@@ -7,39 +7,39 @@
 (defonce date-format "dd/MM/yyyy")
 (defonce initial-date (tf/unparse {:format-str  date-format} (t/now)))
 
-(defn parse-date
+(defn- parse-date
   "Calculate Date from string with format dd/MM/yyyy"
   [string]
   (tf/parse (tf/formatter date-format) string))
 
-(defn invalid-date?
+(defn- invalid-date?
   "Check if string represents a valid js date"
   [string]
   (try (not (parse-date string))
        (catch js/Error _ true)))
 
-(defn set-type!
+(defn- set-type!
   "Set booking type and disable return date accordingly"
   [state type]
   (swap! state assoc
          :type type
          :return-disabled? (= type "one-way")))
 
-(defn set-departure!
+(defn- set-departure!
   "Set departure date and invalid-departure?"
   [state value]
   (swap! state assoc
          :departure-date value
          :invalid-departure? (invalid-date? value)))
 
-(defn set-return!
+(defn- set-return!
   "set return date and invalid-departure?"
   [state value]
   (swap! state assoc
          :return-date value
          :invalid-return? (invalid-date? value)))
 
-(defn can-not-book?
+(defn- can-not-book?
   "Check if all conditions are valid for booking"
   [state]
   (or (:invalid-departure? state)
@@ -48,7 +48,7 @@
            (t/after? (parse-date (:departure-date state))
                      (parse-date (:return-date state))))))
 
-(defn book!
+(defn- book!
   "Alert user with their booked choice"
   [state]
   (js/alert (case (:type state)

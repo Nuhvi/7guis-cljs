@@ -2,12 +2,12 @@
   (:require [reagent.core :as r]
             [clojure.string :as str]))
 
-(defn kebab-case
+(defn- kebab-case
   "Convert string to a kebab-case string"
   [string]
   (str/replace (str/lower-case string) #"\s" "-"))
 
-(defn snake-case
+(defn- snake-case
   "Convert string to a snake_case string"
   [string]
   (str/replace (str/lower-case string) #"\s" "_"))

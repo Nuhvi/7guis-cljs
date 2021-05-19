@@ -3,12 +3,12 @@
             [app.wrapper :refer [wrapper]]))
 
 
-(defn percentage 
+(defn- percentage 
   "Returns the percentage as string, e.g: '10%'"
   [numerator denominator]
   (-> (/ numerator denominator) (min 1) (* 100) (str "%")))
 
-(defn secondify
+(defn- secondify
   "Returns a string represinting the seconds as a float"
   [seconds]
   (-> seconds
@@ -16,7 +16,7 @@
       (.toFixed 1)
       (str "s")))
 
-(defn set-duration!
+(defn- set-duration!
   "Set the duration in state"
   [state e]
   (swap! state assoc :duration (js/Number (.. e -target -value))))
@@ -27,7 +27,7 @@
 (defonce SECONDS_PER_FRAME (/ 1 FPS))
 (defonce MILISECONDS_PER_FRAME (/ 1000 FPS))
 
-(defn tick
+(defn- tick
   "Update the state at each interval and limit elapsed <= duration"
   [state]
   (swap! state assoc :elapsed (min (+ (:elapsed @state) SECONDS_PER_FRAME)
