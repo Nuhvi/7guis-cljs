@@ -4,9 +4,9 @@
             [cljs.reader :as reader]
             [app.wrapper :refer [wrapper]]))
 
-;; ===============
-;; Sheet utilities
-;; ===============
+;; ================
+;; Sheet generation
+;; ================
 
 (defonce COLUMNS (map char (range 65 91)))
 
@@ -22,7 +22,8 @@
   "Generates a row of cell atoms"
   [row-no]
   (->> COLUMNS
-       (map #(list (generate-cell-id % row-no) (r/atom INITIAL_CELL)))))
+       (map #(let [id (generate-cell-id % row-no)]
+               (list id (r/atom (merge {:id id} INITIAL_CELL)))))))
 
 (defn- generate-sheet
   "Generates an atom for each cell in the sheet"
@@ -34,11 +35,134 @@
 
 (defonce sheet (generate-sheet))
 
+;; =======
+;; Helpers
+;; =======
+
+(defn- error
+  "Throw an object to be caught and logged at update-cell!"
+  [code data]
+  (throw {:code code :data data}))
+
+(defonce ERROR_NAMES {"#REF!" "Contains Self Reference"
+                      "#NAME?" "Unresolved Reference"})
+
+(defn- log-error
+  "Log a formatted warning given an error object"
+  [cell-id e]
+  (js/console.warn
+   (str "7GUIs-Cells Error:\n"
+        (or (get ERROR_NAMES (:code e)) "Unknown error")
+        " at " cell-id ":\n"
+        (or (:data e) e))))
+
+;; ===================
+;; Forward propagation
+;; ===================
+
+;; ===================
+;; Formula evaluations
+;; ===================
+
+(def formula-matcher #"([a-zA-Z]+)\s*\((.*)?\)")
+
+(defn- has-formula?
+  "Check if there is an excel like formula in a string"
+  [string]
+  (re-find formula-matcher string))
+
+(defn- lispify
+  "Format a formula to an S-expression"
+  [string]
+  (if (has-formula? string)
+    (lispify (str/replace string formula-matcher "($1, $2)"))
+    string))
+
+(defonce OPERATORS {:sum +
+                    :sub -
+                    :div /
+                    :mul *
+                    :mod mod
+                    :avg (fn [& args] (/ (apply + args) (count args)))
+                    :count (fn [& args] (count args))})
+
+(defn- resolve-cell-val
+  "Get the value of a cell given its id"
+  [cell-id]
+  (let [cell (get sheet (str/upper-case cell-id))]
+    (if cell
+      (:value @cell)
+      (error "#NAME?" cell-id))))
+
+(defn- resolve-reference
+  "Get the value of either single cell or a range of cells by reference"
+  [sym]
+  (if (re-find #"(?i)[A-Z]\d\d?:[A-Z]\d\d?" (str sym))
+    (prn (str sym))
+    (resolve-cell-val (str sym))))
+
+(defn- resolve-operator*
+  "Find a predefined operator by its symbol"
+  [symbol]
+  (get OPERATORS (->> symbol str str/lower-case keyword)))
+
+(def resolve-operator (memoize resolve-operator*))
+
+(defn- eval-form
+  "Evaluate form recursively after resolving operators"
+  [form]
+  (let [resolved (map #(cond (list? %) (eval-form %)
+                             (symbol? %) (or (resolve-operator %)
+                                             (resolve-reference %))
+                             :else %)
+                      form)
+        operator (first resolved)
+        args (rest resolved)]
+    (apply operator args)))
+
+(defn- eval-str
+  "Evaluate a formula string"
+  [string]
+  (if (has-formula? string)
+    (->> string
+         (lispify)
+         (reader/read-string)
+         (eval-form))
+    ;; If there is a letter after = it should be a reference
+    (if (re-find #"[a-zA-Z]" string)
+      (resolve-reference string)
+      string)))
+
+(defn- contains-self-reference?
+  [id string]
+  (re-find (re-pattern (str "(?i)[, (]?" id "[, )]?")) string))
+
+(defn- eval-formula*
+  [id formula]
+  (if (= "=" (first formula))
+    (if (contains-self-reference? id formula)
+      (error "#REF!" formula)
+      (eval-str (subs formula 1)))
+    formula))
+
+(def eval-formula (memoize eval-formula*))
+
+(defn- update-cell!
+  "Updates a cell's formula and Evalute it to set the value"
+  [cell formula]
+  (try
+    (swap! cell assoc :formula formula
+           :value (eval-formula (:id @cell) formula))
+    (catch :default e (do (log-error (:id @cell) e)
+                          (swap! cell assoc
+                                 :formula formula
+                                 :err (or (:code e) "#Error!"))))))
+
 ;; ====================
 ;; Navigation functions
 ;; ====================
 
-(defn move-focus
+(defn- move-focus
   "Focus on a neighboring cell"
   [target direction]
   (let [row (.-parentElement target)
@@ -59,81 +183,23 @@
            false)
          (.focus))))
 
-;; ===================
-;; Formula evaluations
-;; ===================
-
-(defonce OPERATORS {:sum +
-                    :sub -
-                    :div /})
-
-(defn- resolve-symbol
-  "Find a predefined operator by its symbol"
-  [symbol]
-  (get OPERATORS (->> symbol str str/lower-case keyword)))
-
-(def formula-matcher #"([a-zA-Z]+)\s*\((.*)?\)")
-
-(defn- has-formula?
-  "Check if there is an excel like formula in a string"
-  [string]
-  (re-find formula-matcher string))
-
-(defn- lispify
-  "Format a formula to a clojure form notation"
-  [string]
-  (if (has-formula? string)
-    (lispify (str/replace string formula-matcher "($1, $2)"))
-    string))
-
-(defn- eval-form
-  "Evaluate form recursively after resolving operators"
-  [form]
-  (let [resolved (map #(cond (list? %) (eval-form %)
-                             (symbol? %) (resolve-symbol %)
-                             :else %)
-                      form)
-        operator (first resolved)
-        args (rest resolved)]
-    (try
-      (apply operator args)
-      (catch :default _ :error))))
-
-(defn- eval-str
-  "Evaluate a formula string"
-  [string]
-  (if (has-formula? string)
-    (->> string
-         (lispify)
-         (reader/read-string)
-         (eval-form))
-    string))
-
-(defn- set-value!
-  "Evaluate the formula and update the value in a cell"
-  [cell]
-  (let [formula (:formula @cell)]
-    (swap! cell assoc :value (if (= "=" (first formula))
-                               (eval-str (subs formula 1))
-                               formula))))
-
 ;; ==============
 ;; Event handlers
 ;; ==============
-                               
-(defn update-formula!
-  "Updates a cell's formula"
-  [cell formula]
-  (swap! cell assoc :formula formula))
 
 (defn handle-key-down-input!
   "Handle key press event in a cell"
-  [ev cell]
+  [ev edit-mode? cell]
   (.stopPropagation ev)
-  (let [key (.-key ev)]
-    (if (or (= key "Enter") (= key "Escape"))
-      (move-focus (.. ev -target -parentElement) :down)
-      (update-formula! cell (.. ev -target -value)))))
+  (let [key (.-key ev)
+        parent (.. ev -target -parentElement)]
+    (when (contains? #{"Enter" "Tab" "Escape"} key)
+      (update-cell! cell (.. ev -target -value)))
+    (when (= key "Escape")
+      (reset! edit-mode? false)
+      (.focus parent))
+    (when (= key "Enter")
+      (move-focus parent :down))))
 
 (defn- handle-key-down-cell!
   "Start editing a cell on Enter, or navigate for arrow keys"
@@ -156,22 +222,16 @@
               (.-ctrlKey ev) (move-focus target :last)
               (.-altKey ev) (move-focus target :last-in-col)
               :else (move-focus target :last-in-row))
-      "Delete" (update-formula! cell "")
+      "Delete" (update-cell! cell "")
       ;; Enter edit mode if any single character was down
       (when (= 1 (count key))
         (reset! edit-mode? true)
-        (update-formula! cell key)))))
+        (update-cell! cell key)))))
 
 (defn- should-blur
   "Check that the new focus target is not a child of the event currentTarget"
   [ev]
   (not (.contains (.-currentTarget ev) (.-relatedTarget ev))))
-
-(defn- handle-blur-cell!
-  [ev cell edit-mode?]
-  (when (should-blur ev)
-    (reset! edit-mode? false)
-    (set-value! cell)))
 
 ;; ==========
 ;; Components
@@ -186,18 +246,18 @@
     (fn []
       (let [c @cell
             formula (:formula c)
-            value (:value c)]
-        [:td.cell {:class (when (= value :error) "invalid")
+            value (:value c)
+            err (:err c)]
+        [:td.cell {:class (when err "invalid")
                    :tab-index (if @edit-mode? -1 0)
                    :on-key-down #(handle-key-down-cell! % edit-mode? cell)
-                   :on-blur #(handle-blur-cell! % cell edit-mode?)
+                   :on-blur #(when (should-blur %) (reset! edit-mode? false))
                    :on-double-click #(reset! edit-mode? true)}
          (if @edit-mode?
            [:input {:auto-focus true
                     :on-focus #(set! (.. % -target -value) formula)
-                    :on-change #(update-formula! cell (.. % -target -value))
-                    :on-key-down #(handle-key-down-input! % cell)}]
-           [:div.value (if (= value :error) "#ERROR!" value)])]))))
+                    :on-key-down #(handle-key-down-input! % edit-mode? cell)}]
+           [:div.value (if err err (str value))])])))) ;; cast to string in case of NaN
 
 (defn row
   "Draws a table row"
@@ -217,25 +277,37 @@
 (defn help []
   (let [open (r/atom true)]
     (fn []
-      [:div.help 
+      [:div.help
        [:button.icon {:tab-index 0
-                   :on-click #(swap! open not)}
+                      :on-click #(swap! open not)}
         help-svg]
        [:div.data {:class (when @open "open")}
-        [:div "Edit mode: "
-         [:ol
-          [:li "Enter: to enter or exit edit mode"]
-          [:li "Escape: exit edit mode"]
-          [:li "Space / Double click : to start editing a cell"]
-          [:li "Type any character: override formula"]
-          [:li "Delete: empty a cell"]
-        ]]
         [:div "Navigation: "
          [:ol
-          [:li "Arrow keys: move to neighboring cells"]
-          [:li "Home / End: move to the first or last cell in a row"]
-          [:li "Alt+Home / Alt+End: move to the first or last cell in a column"]
-          [:li "Ctrl+Home / Ctrl+End: move to the first or last cell in the sheet"]]]]])))
+          [:li "Tab / Arrow keys: move to neighboring cells."]
+          [:li "Home / End: move to the first or last cell in a row."]
+          [:li "Alt+Home / Alt+End: move to the first or last cell in a column."]
+          [:li "Ctrl+Home / Ctrl+End: move to the first or last cell in the sheet."]]]
+        [:div "Edit mode: "
+         [:ol
+          [:li "Enter: to enter or exit edit mode."]
+          [:li "Escape: exit edit mode."]
+          [:li "Space / Double click : to start editing a cell."]
+          [:li "Type any character: override formula."]
+          [:li "Delete: empty a cell."]]]
+        [:div "References: "
+         [:ol
+          [:li "You can reference the value of other cell separately '=F1'"]
+          [:li "You can reference the value of other cell in a formula '=sum(1, A1)'"]
+          [:li "You can reference a range of cells as a list '=count(A1:B1)'"]
+          [:li "Cells values propagate to all cells referencing them."]]]
+        [:div "Formulas: "
+         [:ol
+          [:li "Formulas should start with an = sign '=sum()'"]
+          [:li "You can nest formulas inside each others '=sum(1, 2, div(1, 5))'"]
+          [:li "Formulas get converted to variadic clojure forms '=sum(1,2)'>>'(+ 1 2)'"]
+          [:li "Available operations: "
+           (map #(str (str/upper-case (name %)) " ") (keys OPERATORS))]]]]])))
 
 (defn cells []
   (fn []
