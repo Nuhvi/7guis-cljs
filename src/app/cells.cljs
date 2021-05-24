@@ -35,9 +35,9 @@
 
 (defonce sheet (generate-sheet))
 
-;; =======
-;; Helpers
-;; =======
+;; ==========
+;; Error logs
+;; ==========
 
 (defn- error
   "Throw an object to be caught and logged at update-cell!"
@@ -60,6 +60,62 @@
 ;; Forward propagation
 ;; ===================
 
+;; ==========
+;; References
+;; ==========
+
+(defn- resolve-cell-val
+  "Get the value of a cell given its id"
+  [cell-id]
+  (let [cell (get sheet (str/upper-case cell-id))]
+    (if cell
+      (let [val (:value @cell) num (js/Number val)]
+        (if (js/Number.isNaN num) val num))
+      (error "#NAME?" cell-id))))
+
+(defn- inc-ref
+  "Increment a reference assuming the follow the pattern [A->Z][1->99]"
+  [ref]
+  (let [col (first ref) row (js/Number (subs ref 1))]
+    (if (= row 99)
+      (str (nth COLUMNS (inc (.indexOf COLUMNS col))) 1)
+      (str col (inc row)))))
+
+(defn- range-references
+  "Return a list of references inclusive between two refs given a rage like A34:B22"
+  [range]
+  (let [[start end] (str/split range ":")]
+    (concat (take-while #(not= % end) (iterate inc-ref start)) (list end))))
+
+(defn- resolve-reference
+  "Get the value of either single cell or a range of cells by reference"
+  [sym]
+  (let [ref (str/upper-case (str sym))]
+    (prn ref)
+    (if (re-find #"(?i)[A-Z]\d\d?:[A-Z]\d\d?" ref)
+      (map #(resolve-cell-val %) (range-references ref))
+      (resolve-cell-val ref))))
+
+;; =========
+;; Operators
+;; =========
+
+(defonce OPERATORS {:sum (fn [& args] (apply + (flatten args)))
+                    :sub (fn [& args] (apply - (flatten args)))
+                    :div (fn [& args] (apply / (flatten args)))
+                    :mul (fn [& args] (apply * (flatten args)))
+                    :mod (fn [& args] (apply mod (flatten args)))
+                    :avg (fn [& args] (/ (apply + (flatten args))
+                                         (count (flatten args))))
+                    :count (fn [& args] (count (flatten args)))})
+
+(defn- resolve-operator*
+  "Find a predefined operator by its symbol"
+  [symbol]
+  (get OPERATORS (->> symbol str str/lower-case keyword)))
+
+(def resolve-operator (memoize resolve-operator*))
+
 ;; ===================
 ;; Formula evaluations
 ;; ===================
@@ -78,38 +134,8 @@
     (lispify (str/replace string formula-matcher "($1, $2)"))
     string))
 
-(defonce OPERATORS {:sum +
-                    :sub -
-                    :div /
-                    :mul *
-                    :mod mod
-                    :avg (fn [& args] (/ (apply + args) (count args)))
-                    :count (fn [& args] (count args))})
-
-(defn- resolve-cell-val
-  "Get the value of a cell given its id"
-  [cell-id]
-  (let [cell (get sheet (str/upper-case cell-id))]
-    (if cell
-      (:value @cell)
-      (error "#NAME?" cell-id))))
-
-(defn- resolve-reference
-  "Get the value of either single cell or a range of cells by reference"
-  [sym]
-  (if (re-find #"(?i)[A-Z]\d\d?:[A-Z]\d\d?" (str sym))
-    (prn (str sym))
-    (resolve-cell-val (str sym))))
-
-(defn- resolve-operator*
-  "Find a predefined operator by its symbol"
-  [symbol]
-  (get OPERATORS (->> symbol str str/lower-case keyword)))
-
-(def resolve-operator (memoize resolve-operator*))
-
 (defn- eval-form
-  "Evaluate form recursively after resolving operators"
+  "Evaluate form recursively after resolving symbols"
   [form]
   (let [resolved (map #(cond (list? %) (eval-form %)
                              (symbol? %) (or (resolve-operator %)
@@ -151,12 +177,15 @@
   "Updates a cell's formula and Evalute it to set the value"
   [cell formula]
   (try
-    (swap! cell assoc :formula formula
-           :value (eval-formula (:id @cell) formula))
-    (catch :default e (do (log-error (:id @cell) e)
-                          (swap! cell assoc
-                                 :formula formula
-                                 :err (or (:code e) "#Error!"))))))
+    (swap! cell assoc
+           :formula formula
+           :value (eval-formula (:id @cell) formula)
+           :err false)
+    (catch :default e
+      (do (log-error (:id @cell) e)
+          (swap! cell assoc
+                 :formula formula
+                 :err (or (:code e) "#Error!"))))))
 
 ;; ====================
 ;; Navigation functions
@@ -171,7 +200,7 @@
         pos (.indexOf (js/Array.from siblings) target)]
     (->> (case direction
            :left (.-previousSibling target)
-           :right (or (.-nextSibling target) target)  
+           :right (or (.-nextSibling target) target)
            :up (nth (js/Array.from (.. row -previousSibling -children)) pos)
            :down (nth (js/Array.from (.. row -nextSibling -children)) pos)
            :first (second (.-children (second rows)))
@@ -275,7 +304,7 @@
    [:path {:d "M256 214.33c-11.046 0-20 8.954-20 20v128.793c0 11.046 8.954 20 20 20s20-8.955 20-20.001V234.33c0-11.046-8.954-20-20-20z"}]])
 
 (defn help []
-  (let [open (r/atom true)]
+  (let [open (r/atom false)]
     (fn []
       [:div.help
        [:button.icon {:tab-index 0
@@ -298,14 +327,14 @@
         [:div "References: "
          [:ol
           [:li "You can reference the value of other cell separately '=F1'"]
-          [:li "You can reference the value of other cell in a formula '=sum(1, A1)'"]
-          [:li "You can reference a range of cells as a list '=count(A1:B1)'"]
+          [:li "You can reference the value of other cell in a formula '=SUM(1, A1)'"]
+          [:li "You can reference a range of cells as a list '=SUM(A1:A5, B1:B5)'"]
           [:li "Cells values propagate to all cells referencing them."]]]
         [:div "Formulas: "
          [:ol
-          [:li "Formulas should start with an = sign '=sum()'"]
-          [:li "You can nest formulas inside each others '=sum(1, 2, div(1, 5))'"]
-          [:li "Formulas get converted to variadic clojure forms '=sum(1,2)'>>'(+ 1 2)'"]
+          [:li "Formulas should start with an = sign '=SUM()'"]
+          [:li "You can nest formulas inside each others '=SUM(1, 2, div(1, 5))'"]
+          [:li "Formulas get converted to variadic clojure forms '=SUM(1,2)'>>'(+ 1 2)'"]
           [:li "Available operations: "
            (map #(str (str/upper-case (name %)) " ") (keys OPERATORS))]]]]])))
 
