@@ -1,6 +1,7 @@
 (ns app.cells
   (:require [reagent.core :as r]
             [clojure.string :as str]
+            [clojure.set :as set]
             [cljs.reader :as reader]
             [app.wrapper :refer [wrapper]]))
 
@@ -35,6 +36,11 @@
 
 (defonce sheet (generate-sheet))
 
+(defn- get-cell
+  "Get a cell from the sheet given a case insensitive id"
+  [cell-id]
+ (get sheet (str/upper-case cell-id)))
+
 ;; ==========
 ;; Error logs
 ;; ==========
@@ -56,21 +62,22 @@
         " at " cell-id ":\n"
         (or (:data e) e))))
 
-;; ===================
-;; Forward propagation
-;; ===================
-
 ;; ==========
 ;; References
 ;; ==========
 
+(defn- is-range-ref? 
+  "Check if a ref is a range of references"
+  [ref]
+  (re-find #"(?i)[A-Z]\d\d?:[A-Z]\d\d?" ref))
+
 (defn- resolve-cell-val
   "Get the value of a cell given its id"
   [cell-id]
-  (let [cell (get sheet (str/upper-case cell-id))]
+  (let [cell (get-cell cell-id)]
     (if cell
       (let [val (:value @cell) num (js/Number val)]
-        (if (js/Number.isNaN num) val num))
+        (if (or (str/blank? val) (js/Number.isNaN num)) "" num))
       (error "#NAME?" cell-id))))
 
 (defn- inc-ref
@@ -91,8 +98,7 @@
   "Get the value of either single cell or a range of cells by reference"
   [sym]
   (let [ref (str/upper-case (str sym))]
-    (prn ref)
-    (if (re-find #"(?i)[A-Z]\d\d?:[A-Z]\d\d?" ref)
+    (if (is-range-ref? ref)
       (map #(resolve-cell-val %) (range-references ref))
       (resolve-cell-val ref))))
 
@@ -160,32 +166,73 @@
       string)))
 
 (defn- contains-self-reference?
-  [id string]
-  (re-find (re-pattern (str "(?i)[, (]?" id "[, )]?")) string))
+  [cell-id string]
+  (re-find (re-pattern (str "(?i)[, (]?" cell-id "[, )]?")) string))
 
 (defn- eval-formula*
-  [id formula]
+  [cell-id formula]
   (if (= "=" (first formula))
-    (if (contains-self-reference? id formula)
+    (if (contains-self-reference? cell-id formula)
       (error "#REF!" formula)
       (eval-str (subs formula 1)))
     formula))
 
 (def eval-formula (memoize eval-formula*))
 
-(defn- update-cell!
-  "Updates a cell's formula and Evalute it to set the value"
-  [cell formula]
-  (try
-    (swap! cell assoc
-           :formula formula
-           :value (eval-formula (:id @cell) formula)
-           :err false)
-    (catch :default e
-      (do (log-error (:id @cell) e)
-          (swap! cell assoc
-                 :formula formula
-                 :err (or (:code e) "#Error!"))))))
+;; ===================
+;; Forward propagation
+;; ===================
+
+(defn- find-refs
+  "Return all single and range references in a formula"
+  [formula]
+  (if formula
+    (re-seq #"(?i)[A-Z]\d\d?(?::[A-Z]\d\d?)?" formula)
+    (list)))
+
+(defn- expand-ranges
+  "Crawl through a list of refs and expand range refs to a list of refs"
+  [refs]
+  (map #(if (is-range-ref? %) (range-references %) %) refs))
+
+(defn- formula-refs
+  "Return a set of references a formula"
+  [formula]
+  (->> formula
+       (find-refs)
+       (expand-ranges)
+       (flatten)
+       (set)))
+
+(defn- re-calculate
+  "Recalculate the cell value whenever a the value of a referenced cell changes"
+  [cell-id _ old-val new-val]
+  (when (not= (:value old-val) (:value new-val))
+    (let [cell (get-cell cell-id)
+          c @cell
+          formula (:formula c)]
+      (try
+        (swap! cell assoc
+               :formula formula
+               :value (eval-formula* cell-id formula)
+               :err false)
+        (catch :default e
+          (do (log-error cell-id e)
+              (swap! cell assoc
+                     :formula formula
+                     :err (or (:code e) "#Error!"))))))))
+
+(defn- update-watchers
+  "Remove all previous watchers and add new watchers for referenced cells in formula"
+  [cell-id old-formula new-formula]
+  (let [old-refs (formula-refs old-formula)
+        new-refs (formula-refs new-formula)
+        remove-refs (set/difference old-refs new-refs)
+        add-refs (set/difference new-refs old-refs)]
+    (doseq [watched (map #(get-cell %) remove-refs)]
+      (when watched (remove-watch watched cell-id)))
+    (doseq [to-watch (map #(get-cell %) add-refs)]
+      (when to-watch (add-watch to-watch cell-id re-calculate)))))
 
 ;; ====================
 ;; Navigation functions
@@ -215,6 +262,25 @@
 ;; ==============
 ;; Event handlers
 ;; ==============
+
+(defn- update-cell!
+  "Updates a cell's formula and Evalute it to set the value"
+  [cell formula]
+  (let [c @cell
+        cell-id (:id c)
+        old-formula (:formula c)]
+    (when (not= old-formula formula)
+      (try
+        (swap! cell assoc
+               :formula formula
+               :value (eval-formula cell-id formula)
+               :err false)
+        (update-watchers cell-id old-formula formula)
+        (catch :default e
+          (do (log-error cell-id e)
+              (swap! cell assoc
+                     :formula formula
+                     :err (or (:code e) "#Error!"))))))))
 
 (defn handle-key-down-input!
   "Handle key press event in a cell"
@@ -271,7 +337,7 @@
   [col row]
   (let [edit-mode? (r/atom false)
         cell-id (generate-cell-id col row)
-        cell (get sheet cell-id)]
+        cell (get-cell cell-id)]
     (fn []
       (let [c @cell
             formula (:formula c)
