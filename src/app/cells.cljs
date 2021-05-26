@@ -217,10 +217,10 @@
                :value (eval-formula* cell-id formula)
                :err false)
         (catch :default e
-          (do (log-error cell-id e)
-              (swap! cell assoc
-                     :formula formula
-                     :err (or (:code e) "#Error!"))))))))
+          ((log-error cell-id e)
+           (swap! cell assoc
+                  :formula formula
+                  :err (or (:code e) "#Error!"))))))))
 
 (defn- update-watchers
   "Remove all previous watchers and add new watchers for referenced cells in formula"
@@ -277,10 +277,10 @@
                :err false)
         (update-watchers cell-id old-formula formula)
         (catch :default e
-          (do (log-error cell-id e)
-              (swap! cell assoc
-                     :formula formula
-                     :err (or (:code e) "#Error!"))))))))
+          ((log-error cell-id e)
+           (swap! cell assoc
+                  :formula formula
+                  :err (or (:code e) "#Error!"))))))))
 
 (defn handle-key-down-input!
   "Handle key press event in a cell"
@@ -288,7 +288,7 @@
   (.stopPropagation ev)
   (let [key (.-key ev)
         parent (.. ev -target -parentElement)]
-    (when (contains? #{"Enter" "Tab" "Escape"} key)
+    (when (contains? #{"Enter" "Tab"} key)
       (update-cell! cell (.. ev -target -value)))
     (when (= key "Escape")
       (reset! edit-mode? false)
@@ -321,12 +321,25 @@
       ;; Enter edit mode if any single character was down
       (when (= 1 (count key))
         (reset! edit-mode? true)
-        (update-cell! cell key)))))
+        ;; A little hacky way to carry the first key to the
+        ;; value of the Input element after it is added to the DOM.
+        (js/setTimeout
+         #(set! (.-value (first (.-children target))) key)
+         60)))))
 
 (defn- should-blur
   "Check that the new focus target is not a child of the event currentTarget"
   [ev]
   (not (.contains (.-currentTarget ev) (.-relatedTarget ev))))
+
+(defn- handle-blur-cell
+  "Update cell by the input value when and reset edit-mode"
+  [ev edit-mode? cell]
+  (when (should-blur ev)
+    ;; Update cell if the focus was on Input before blur
+    (when (not= (.-target ev) (.-currentTarget ev))
+      (update-cell! cell (.. ev -target -value)))
+    (reset! edit-mode? false)))
 
 ;; ==========
 ;; Components
@@ -346,7 +359,7 @@
         [:td.cell {:class (when err "invalid")
                    :tab-index (if @edit-mode? -1 0)
                    :on-key-down #(handle-key-down-cell! % edit-mode? cell)
-                   :on-blur #(when (should-blur %) (reset! edit-mode? false))
+                   :on-blur #(handle-blur-cell % edit-mode? cell)
                    :on-double-click #(reset! edit-mode? true)}
          (if @edit-mode?
            [:input {:auto-focus true
@@ -386,7 +399,7 @@
         [:div "Edit mode: "
          [:ol
           [:li "Enter: to enter or exit edit mode."]
-          [:li "Escape: exit edit mode."]
+          [:li "Escape: exit edit mode and discard changes."]
           [:li "Space / Double click : to start editing a cell."]
           [:li "Type any character: override formula."]
           [:li "Delete: empty a cell."]]]
