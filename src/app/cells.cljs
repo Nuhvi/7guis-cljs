@@ -77,7 +77,7 @@
   (let [cell (get-cell cell-id)]
     (if cell
       (let [val (:value @cell) num (js/Number val)]
-        (if (or (str/blank? val) (js/Number.isNaN num)) "" num))
+        (if (or (str/blank? val) (js/Number.isNaN num)) val num))
       (error "#NAME?" cell-id))))
 
 (defn- inc-ref
@@ -217,10 +217,10 @@
                :value (eval-formula* cell-id formula)
                :err false)
         (catch :default e
-          ((log-error cell-id e)
-           (swap! cell assoc
-                  :formula formula
-                  :err (or (:code e) "#Error!"))))))))
+          (do (log-error cell-id e)
+              (swap! cell assoc
+                     :formula formula
+                     :err (or (:code e) "#Error!"))))))))
 
 (defn- update-watchers
   "Remove all previous watchers and add new watchers for referenced cells in formula"
@@ -277,10 +277,10 @@
                :err false)
         (update-watchers cell-id old-formula formula)
         (catch :default e
-          ((log-error cell-id e)
-           (swap! cell assoc
-                  :formula formula
-                  :err (or (:code e) "#Error!"))))))))
+          (do (log-error cell-id e)
+              (swap! cell assoc
+                     :formula formula
+                     :err (or (:code e) "#Error!"))))))))
 
 (defn handle-key-down-input!
   "Handle key press event in a cell"
