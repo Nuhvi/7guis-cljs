@@ -162,13 +162,13 @@
        [:div.buttons
         [:input {:type "button"
                  :value "Create"
-                 :aria-disabled (not (can-create? @state))
+                 :disabled (not (can-create? @state))
                  :on-click #(handle-create! state)}]
         [:input {:type "button"
                  :value "Update"
-                 :aria-disabled (not (can-update? @state))
+                 :disabled (not (can-update? @state))
                  :on-click #(handle-update! state)}]
         [:input {:type "button"
                  :value "Delete"
-                 :aria-disabled (not (can-delete? @state))
+                 :disabled (not (can-delete? @state))
                  :on-click #(handle-delete! state)}]]])))

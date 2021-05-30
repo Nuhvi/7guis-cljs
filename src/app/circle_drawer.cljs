@@ -227,13 +227,13 @@
         [:input {:type "button"
                  :value "Undo"
                  :on-click #(undo! state)
-                 :aria-disabled (not (can-undo? @state))}]
+                 :disabled (not (can-undo? @state))}]
         [:input {:type "button"
                  :value "Redo"
                  :on-click #(redo! state)
-                 :aria-disabled (not (can-redo? @state))}]
+                 :disabled (not (can-redo? @state))}]
         [:input {:type "button"
                  :value "Reset"
                  :on-click #(when (should-reset? @state)
                               (reset! state INITIAL_STATE))
-                 :aria-disabled (should-reset? @state)}]]])))
+                 :disabled (not (should-reset? @state))}]]])))
